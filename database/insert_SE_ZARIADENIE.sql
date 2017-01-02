@@ -1,0 +1,13 @@
+
+CREATE OR REPLACE PROCEDURE insert_SE_ZARIADENIE(
+     typ IN SE_ZARIADENIE.typ%TYPE
+     )
+IS
+BEGIN
+
+  INSERT INTO SE_ZARIADENIE VALUES (seq_cislo_zariadenia.nextval, typ, 0);
+
+  COMMIT;
+
+END;
+/
