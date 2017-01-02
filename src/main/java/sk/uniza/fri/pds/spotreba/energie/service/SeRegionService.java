@@ -5,7 +5,13 @@
  */
 package sk.uniza.fri.pds.spotreba.energie.service;
 
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.LinkedList;
 import java.util.List;
+import sk.uniza.fri.pds.spotreba.energie.OracleJDBCConnector;
 import sk.uniza.fri.pds.spotreba.energie.domain.SeRegion;
 
 public class SeRegionService implements SeService<SeRegion> {
@@ -23,8 +29,20 @@ public class SeRegionService implements SeService<SeRegion> {
 
     @Override
     public List<SeRegion> findAll() {
-
-        return null;
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("SELECT * FROM SE_REGION ORDER BY ID_REGIONU ASC");
+            ResultSet result = stmnt.executeQuery();
+            List<SeRegion> output = new LinkedList<>();
+            while (result.next()) {
+                SeRegion o = new SeRegion();
+                o.setIdRegionu(result.getInt("ID_REGIONU"));
+                o.setNazov(result.getString("NAZOV"));
+                output.add(o);
+            }
+            return output;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
