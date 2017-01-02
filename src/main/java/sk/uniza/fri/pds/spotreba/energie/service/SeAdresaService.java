@@ -30,7 +30,7 @@ public class SeAdresaService implements SeService<SeAdresa> {
     @Override
     public List<SeAdresa> findAll() {
         try (Connection connection = OracleJDBCConnector.getConnection();) {
-            CallableStatement stmnt = connection.prepareCall("SELECT * FROM SE_ADRESA");
+            CallableStatement stmnt = connection.prepareCall("SELECT * FROM SE_ADRESA ORDER BY ID_ADRESY ASC");
             ResultSet result = stmnt.executeQuery();
             List<SeAdresa> output = new LinkedList<>();
             while (result.next()) {
@@ -43,9 +43,8 @@ public class SeAdresaService implements SeService<SeAdresa> {
             }
             return output;
         } catch (SQLException e) {
-
+            throw new RuntimeException(e);
         }
-        return null;
     }
 
     @Override

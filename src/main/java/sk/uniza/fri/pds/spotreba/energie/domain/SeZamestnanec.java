@@ -5,6 +5,7 @@
  */
 package sk.uniza.fri.pds.spotreba.energie.domain;
 
+import java.awt.image.BufferedImage;
 import java.io.Serializable;
 
 public class SeZamestnanec implements Serializable {
@@ -12,7 +13,7 @@ public class SeZamestnanec implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private int idZamestnanca;
-    private byte[] foto;
+    private BufferedImage foto;
     private String rodCislo;
     private int idRegionu;
 
@@ -24,11 +25,11 @@ public class SeZamestnanec implements Serializable {
         this.idZamestnanca = idZamestnanca;
     }
 
-    public byte[] getFoto() {
+    public BufferedImage getFoto() {
         return foto;
     }
 
-    public void setFoto(byte[] foto) {
+    public void setFoto(BufferedImage foto) {
         this.foto = foto;
     }
 
