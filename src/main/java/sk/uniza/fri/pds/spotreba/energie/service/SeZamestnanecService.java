@@ -5,7 +5,18 @@
  */
 package sk.uniza.fri.pds.spotreba.energie.service;
 
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.sql.Blob;
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.LinkedList;
 import java.util.List;
+import javax.imageio.ImageIO;
+import javax.imageio.stream.ImageInputStream;
+import sk.uniza.fri.pds.spotreba.energie.OracleJDBCConnector;
 import sk.uniza.fri.pds.spotreba.energie.domain.SeZamestnanec;
 
 public class SeZamestnanecService implements SeService<SeZamestnanec> {
@@ -23,8 +34,28 @@ public class SeZamestnanecService implements SeService<SeZamestnanec> {
 
     @Override
     public List<SeZamestnanec> findAll() {
-
-        return null;
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("SELECT * FROM SE_ZAMESTNANEC ORDER BY ID_ZAMESTNANCA ASC");
+            ResultSet result = stmnt.executeQuery();
+            List<SeZamestnanec> output = new LinkedList<>();
+            while (result.next()) {
+                SeZamestnanec o = new SeZamestnanec();
+                o.setIdZamestnanca(result.getInt("ID_ZAMESTNANCA"));
+                o.setIdRegionu(result.getInt("ID_REGIONU"));
+                o.setRodCislo(result.getString("ROD_CISLO"));
+                Blob blob = result.getBlob("FOTO");
+                if (blob != null) {
+                    try (ImageInputStream is = ImageIO.createImageInputStream(blob.getBinaryStream())) {
+                        BufferedImage image = ImageIO.read(is);
+                        o.setFoto(image);
+                    }
+                }
+                output.add(o);
+            }
+            return output;
+        } catch (SQLException | IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
