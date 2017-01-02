@@ -1,0 +1,32 @@
+
+CREATE OR REPLACE PROCEDURE insert_SE_HISTORIA(
+     nove_cislo_odberatela IN SE_HISTORIA.cislo_odberatela%TYPE,
+     nove_cislo_zariadenia IN SE_HISTORIA.cis_zariadenia%TYPE,
+     novy_datum_instalacie IN SE_HISTORIA.datum_instalacie%TYPE
+     )
+IS
+pouziva_sa integer;
+velicina_sa_uz_meria integer;
+zariadenie_sa_pouziva EXCEPTION;
+velicina_sa_meria EXCEPTION;
+typ_meranej_veliciny_pristroja SE_TYP_ZARIADENIA.meracia_velicina%TYPE;
+BEGIN
+  -- kontrola ci nahodou odberatelovi nejdeme namontovat do domu zariadenie ktore ma iny odberatel
+  IF JE_ZARIADENIE_POUZIVANE(nove_cislo_zariadenia)=1 THEN
+  RAISE zariadenie_sa_pouziva;
+  end if;
+  -- kontrola ci sa uz meria velicina, ktoru ma merat nove zariadenie. V dome niesu dve merace napr. na vodu.
+  select count(*) into velicina_sa_uz_meria 
+  from dual where GET_TYP_VELICINY_ZARIADENIA(nove_cislo_zariadenia) IN (select GET_TYP_VELICINY_ZARIADENIA(cis_zariadenia) from SE_HISTORIA
+  where CISLO_ODBERATELA=nove_cislo_odberatela and JE_ZARIADENIE_POUZIVANE(cis_zariadenia)=1);
+  
+  IF velicina_sa_uz_meria=1 THEN
+  RAISE velicina_sa_meria;
+  end if;
+  
+  INSERT INTO SE_HISTORIA VALUES (nove_cislo_odberatela, nove_cislo_zariadenia, novy_datum_instalacie, null);
+
+  COMMIT;
+
+END;
+/

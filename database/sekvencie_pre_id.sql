@@ -24,3 +24,7 @@ CREATE SEQUENCE seq_id_regionu
  START WITH     16528
  INCREMENT BY   1;
  /
+ CREATE SEQUENCE seq_typ_zariadenia
+ START WITH     21
+ INCREMENT BY   1;
+ /
