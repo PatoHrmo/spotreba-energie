@@ -5,7 +5,13 @@
  */
 package sk.uniza.fri.pds.spotreba.energie.service;
 
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.LinkedList;
 import java.util.List;
+import sk.uniza.fri.pds.spotreba.energie.OracleJDBCConnector;
 import sk.uniza.fri.pds.spotreba.energie.domain.SeOdberatel;
 
 public class SeOdberatelService implements SeService<SeOdberatel> {
@@ -23,8 +29,23 @@ public class SeOdberatelService implements SeService<SeOdberatel> {
 
     @Override
     public List<SeOdberatel> findAll() {
-
-        return null;
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("SELECT * FROM SE_ODBERATEL ORDER BY CISLO_ODBERATELA ASC");
+            ResultSet result = stmnt.executeQuery();
+            List<SeOdberatel> output = new LinkedList<>();
+            while (result.next()) {
+                SeOdberatel o = new SeOdberatel();
+                o.setCisloOdberatela(result.getInt("CISLO_ODBERATELA"));
+                o.setIco(result.getString("ICO"));
+                o.setKategoria(result.getString("KATEGORIA").charAt(0));
+                o.setRodCislo(result.getString("ROD_CISLO"));
+                o.setTyp(result.getString("TYP").charAt(0));
+                output.add(o);
+            }
+            return output;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
