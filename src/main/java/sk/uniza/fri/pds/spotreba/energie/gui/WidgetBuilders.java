@@ -14,8 +14,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static org.metawidget.inspector.InspectionResultConstants.NAME;
-import static org.metawidget.inspector.InspectionResultConstants.TYPE;
+import static org.metawidget.inspector.InspectionResultConstants.*;
 import org.metawidget.swing.SwingMetawidget;
 import org.metawidget.widgetbuilder.iface.WidgetBuilder;
 
@@ -26,7 +25,14 @@ public class WidgetBuilders {
         @Override
         public Component buildWidget(String elementName, Map<String, String> attributes, SwingMetawidget metawidget) {
             if (Date.class.getName().equalsIgnoreCase(attributes.get(TYPE))) {
-                return new JDateChooser();
+                try {
+                    Object obj = metawidget.getToInspect();
+                    Method method = findGeter(obj, attributes.get(NAME));
+                    Date d = (Date) method.invoke(obj);
+                    return new JDateChooser(d);
+                } catch (NoSuchMethodException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+                    Logger.getLogger(WidgetBuilders.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
             return null;
         }
@@ -40,8 +46,7 @@ public class WidgetBuilders {
             if (BufferedImage.class.getName().equalsIgnoreCase(attributes.get(TYPE))) {
                 try {
                     Object obj = metawidget.getToInspect();
-                    String name = attributes.get(NAME);
-                    Method method = obj.getClass().getMethod("get" + name.substring(0, 1).toUpperCase() + name.substring(1));
+                    Method method = findGeter(obj, attributes.get(NAME));
                     BufferedImage bi = (BufferedImage) method.invoke(obj);
                     ImagePanel panel = new ImagePanel();
                     if (bi != null) {
@@ -56,4 +61,9 @@ public class WidgetBuilders {
         }
 
     }
+
+    private static Method findGeter(Object obj, String name) throws NoSuchMethodException {
+        return obj.getClass().getMethod("get" + name.substring(0, 1).toUpperCase() + name.substring(1));
+    }
+
 }
