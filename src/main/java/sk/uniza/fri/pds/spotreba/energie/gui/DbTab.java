@@ -18,10 +18,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JComponent;
+import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.table.AbstractTableModel;
 import org.jdesktop.beansbinding.AutoBinding.UpdateStrategy;
 import org.metawidget.swing.SwingMetawidget;
 import org.metawidget.swing.widgetbuilder.OverriddenWidgetBuilder;
@@ -202,23 +202,35 @@ public class DbTab extends javax.swing.JPanel {
     }//GEN-LAST:event_loadButtonActionPerformed
 
     private void load() {
-        new SwingWorker<List, Boolean>() {
+        new SwingWorker<List, RuntimeException>() {
             @Override
             protected List doInBackground() throws Exception {
-                return service.findAll();
+                try {
+                    return service.findAll();
+                } catch (RuntimeException e) {
+                    publish(e);
+                    return null;
+                }
             }
 
             @Override
             protected void done() {
                 try {
-                    tableModel = new BeanTableModel(clazz, get());
-                    tableModel.sortColumnNames();
-                    jTable.setModel(tableModel);
-
+                    if (get() != null) {
+                        tableModel = new BeanTableModel(clazz, get());
+                        tableModel.sortColumnNames();
+                        jTable.setModel(tableModel);
+                    }
                 } catch (InterruptedException | ExecutionException ex) {
                     Logger.getLogger(DbTab.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
+
+            @Override
+            protected void process(List<RuntimeException> chunks) {
+                showException("Chyba", chunks.get(0));
+            }
+
         }.execute();
     }
 
@@ -232,33 +244,64 @@ public class DbTab extends javax.swing.JPanel {
     }//GEN-LAST:event_newButtonActionPerformed
 
     private void create() {
-        new SwingWorker<Boolean, Boolean>() {
+        new SwingWorker<Boolean, RuntimeException>() {
             @Override
             protected Boolean doInBackground() throws Exception {
-                service.create(metawidget.getToInspect());
-                return true;
+                try {
+                    service.create(metawidget.getToInspect());
+                    return true;
+                } catch (RuntimeException e) {
+                    publish(e);
+                }
+                return false;
             }
 
             @Override
             protected void done() {
                 // a co teraz?
             }
+
+            @Override
+            protected void process(List<RuntimeException> chunks) {
+                showException("Chyba", chunks.get(0));
+            }
         }.execute();
     }
 
     private void update() {
-        new SwingWorker<Boolean, Boolean>() {
+        new SwingWorker<Boolean, RuntimeException>() {
             @Override
             protected Boolean doInBackground() throws Exception {
-                service.update(metawidget.getToInspect());
-                return true;
+                try {
+                    service.update(metawidget.getToInspect());
+                    return true;
+                } catch (RuntimeException e) {
+                    publish(e);
+                }
+                return false;
             }
 
             @Override
             protected void done() {
-                ((AbstractTableModel) tableModel).fireTableRowsUpdated(jTable.getSelectedRow(), jTable.getSelectedRow());
+                try {
+                    if (get()) {
+                        tableModel.fireTableRowsUpdated(jTable.getSelectedRow(), jTable.getSelectedRow());
+                    }
+                } catch (InterruptedException | ExecutionException ex) {
+                    Logger.getLogger(DbTab.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+            }
+
+            @Override
+            protected void process(List<RuntimeException> chunks) {
+                showException("Chyba", chunks.get(0));
             }
         }.execute();
+    }
+
+    private void showException(String message, Exception e) {
+        JOptionPane.showMessageDialog(null, e.getMessage(), message, JOptionPane.ERROR_MESSAGE);
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel bot;
