@@ -10,7 +10,7 @@ IS
 posledne_namerana_spotreba SE_ZARIADENIE.spotreba%TYPE;
 spotreba_nemoze_klesat EXCEPTION;
 BEGIN
-  select spotreba into posledne_namerana_spotreba from SE_ZARIADENIE where cis_zariadenia = CIS_ZARIADENIA;
+  select spotreba into posledne_namerana_spotreba from SE_ZARIADENIE where cis_zariadenia = cislo_zariadenia;
   IF posledne_namerana_spotreba >  namerana_spotreba THEN
   RAISE spotreba_nemoze_klesat;
   END IF;
