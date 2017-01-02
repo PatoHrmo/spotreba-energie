@@ -5,7 +5,13 @@
  */
 package sk.uniza.fri.pds.spotreba.energie.service;
 
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.LinkedList;
 import java.util.List;
+import sk.uniza.fri.pds.spotreba.energie.OracleJDBCConnector;
 import sk.uniza.fri.pds.spotreba.energie.domain.SeOdpis;
 
 public class SeOdpisService implements SeService<SeOdpis> {
@@ -23,8 +29,22 @@ public class SeOdpisService implements SeService<SeOdpis> {
 
     @Override
     public List<SeOdpis> findAll() {
-
-        return null;
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("SELECT * FROM SE_ODPIS ORDER BY DATUM_ODPISU ASC");
+            ResultSet result = stmnt.executeQuery();
+            List<SeOdpis> output = new LinkedList<>();
+            while (result.next()) {
+                SeOdpis o = new SeOdpis();
+                o.setCisZariadenia(result.getInt("CIS_ZARIADENIA"));
+                o.setDatumOdpisu(result.getDate("DATUM_ODPISU"));
+                o.setIdZamestanca(result.getInt("ID_ZAMESTNANCA"));
+                o.setStav(result.getInt("STAV"));
+                output.add(o);
+            }
+            return output;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
