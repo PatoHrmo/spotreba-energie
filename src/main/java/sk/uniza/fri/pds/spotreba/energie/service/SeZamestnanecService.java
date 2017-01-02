@@ -18,7 +18,7 @@ public class SeZamestnanecService implements SeService<SeZamestnanec> {
 
     @Override
     public void create(SeZamestnanec object) {
-
+        System.out.println("");
     }
 
     @Override

@@ -6,6 +6,7 @@
 package sk.uniza.fri.pds.spotreba.energie.gui;
 
 import com.toedter.calendar.JDateChooser;
+import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.lang.reflect.InvocationTargetException;
@@ -64,7 +65,7 @@ public class DbTab extends javax.swing.JPanel {
             metawidget.setWidgetBuilder(new CompositeWidgetBuilder<>(new CompositeWidgetBuilderConfig()
                     .setWidgetBuilders(
                             new OverriddenWidgetBuilder(), new ReadOnlyWidgetBuilder(),
-                            new WidgetBuilders.DateWidgetBuilder(), new SwingWidgetBuilder()
+                            new WidgetBuilders.DateWidgetBuilder(), new WidgetBuilders.ImageWidgetBuilder(), new SwingWidgetBuilder()
                     )));
             metawidget.addWidgetProcessor(new BeansBindingProcessor(
                     new BeansBindingProcessorConfig()
@@ -73,7 +74,24 @@ public class DbTab extends javax.swing.JPanel {
             metawidget.addWidgetProcessor(new WidgetProcessor<JComponent, SwingMetawidget>() {
                 @Override
                 public JComponent processWidget(JComponent w, String string, Map<String, String> map, SwingMetawidget m) {
-                    if (w instanceof JDateChooser) {
+                    if (w instanceof ImagePanel) {
+                        ((ImagePanel) w).addPropertyChangeListener(new PropertyChangeListener() {
+                            @Override
+                            public void propertyChange(PropertyChangeEvent e) {
+                                if ("image".equals(e.getPropertyName())) {
+                                    try {
+                                        Object o;
+                                        o = m.getToInspect();
+                                        final String name = map.get("name");
+                                        Method method = o.getClass().getMethod("set" + name.substring(0, 1).toUpperCase() + name.substring(1), BufferedImage.class);
+                                        method.invoke(o, e.getNewValue());
+                                    } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+                                        Logger.getLogger(DbTab.class.getName()).log(Level.SEVERE, null, ex);
+                                    }
+                                }
+                            }
+                        });
+                    } else if (w instanceof JDateChooser) {
                         ((JDateChooser) w).getDateEditor().addPropertyChangeListener(new PropertyChangeListener() {
                             @Override
                             public void propertyChange(PropertyChangeEvent e) {
