@@ -5,7 +5,15 @@
  */
 package sk.uniza.fri.pds.spotreba.energie.service;
 
+import java.math.BigDecimal;
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Struct;
+import java.util.LinkedList;
 import java.util.List;
+import sk.uniza.fri.pds.spotreba.energie.OracleJDBCConnector;
 import sk.uniza.fri.pds.spotreba.energie.domain.SeServis;
 
 public class SeServisService implements SeService<SeServis> {
@@ -23,8 +31,27 @@ public class SeServisService implements SeService<SeServis> {
 
     @Override
     public List<SeServis> findAll() {
-
-        return null;
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("SELECT * FROM SE_SERVIS ORDER BY DATUM_SERVISU ASC");
+            ResultSet result = stmnt.executeQuery();
+            List<SeServis> output = new LinkedList<>();
+            while (result.next()) {
+                SeServis o = new SeServis();
+                o.setCisZariadenia(result.getInt("CIS_ZARIADENIA"));
+                o.setDatumServisu(result.getDate("DATUM_SERVISU"));
+                Struct object = (Struct) result.getObject("INFO_SERVISU");
+                Object[] attributes = object.getAttributes();
+                SeServis.InfoServisu infoServisu = new SeServis.InfoServisu();
+                infoServisu.setPopis((String) attributes[0]);
+                infoServisu.setTyp_servisu(((String) attributes[1]).charAt(0));
+                infoServisu.setSpotreba(((BigDecimal) attributes[2]).intValue());
+                o.setInfoServisu(infoServisu);
+                output.add(o);
+            }
+            return output;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

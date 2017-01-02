@@ -45,6 +45,11 @@ public class SeServis implements Serializable {
             this.spotreba = spotreba;
         }
 
+        @Override
+        public String toString() {
+            return String.format("Popis: %s %nTyp: %s %nSpotreba: %d", popis, typ_servisu, spotreba);
+        }
+
     }
 
     public int getCisZariadenia() {
