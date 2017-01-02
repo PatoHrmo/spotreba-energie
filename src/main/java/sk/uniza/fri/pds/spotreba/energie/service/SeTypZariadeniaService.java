@@ -5,7 +5,13 @@
  */
 package sk.uniza.fri.pds.spotreba.energie.service;
 
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.LinkedList;
 import java.util.List;
+import sk.uniza.fri.pds.spotreba.energie.OracleJDBCConnector;
 import sk.uniza.fri.pds.spotreba.energie.domain.SeTypZariadenia;
 
 public class SeTypZariadeniaService implements SeService<SeTypZariadenia> {
@@ -23,7 +29,22 @@ public class SeTypZariadeniaService implements SeService<SeTypZariadenia> {
 
     @Override
     public List<SeTypZariadenia> findAll() {
-        return null;
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("SELECT * FROM SE_TYP_ZARIADENIA ORDER BY TYP ASC");
+            ResultSet result = stmnt.executeQuery();
+            List<SeTypZariadenia> output = new LinkedList<>();
+            while (result.next()) {
+                SeTypZariadenia o = new SeTypZariadenia();
+                o.setTyp(result.getInt("TYP"));
+                o.setMeraciaVelicina(result.getString("MERACIA_VELICINA"));
+                o.setCisloModelu(result.getInt("CISLO_MODELU"));
+                o.setVyrobca(result.getString("VYROBCA"));
+                output.add(o);
+            }
+            return output;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
