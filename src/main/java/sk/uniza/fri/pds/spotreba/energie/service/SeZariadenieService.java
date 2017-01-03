@@ -24,7 +24,13 @@ public class SeZariadenieService implements SeService<SeZariadenie> {
 
     @Override
     public void create(SeZariadenie object) {
-
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("BEGIN INSERT_SE_ZARIADENIE(?); END;");
+            stmnt.setInt(1, object.getTyp());
+            stmnt.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
