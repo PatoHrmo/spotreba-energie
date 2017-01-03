@@ -6,7 +6,10 @@
 package sk.uniza.fri.pds.spotreba.energie.service;
 
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Blob;
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -29,7 +32,19 @@ public class SeZamestnanecService implements SeService<SeZamestnanec> {
 
     @Override
     public void create(SeZamestnanec object) {
-        System.out.println("");
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("BEGIN INSERT_SE_ZAMESTNANEC(?, ?, ?); END;");
+            stmnt.setString(1, object.getRodCislo());
+            stmnt.setInt(1, object.getIdRegionu());
+            try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+                ImageIO.write(object.getFoto(), "jpeg", os);
+                InputStream is = new ByteArrayInputStream(os.toByteArray());
+                stmnt.setBlob(3, is);
+            }
+            stmnt.execute();
+        } catch (SQLException | IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
