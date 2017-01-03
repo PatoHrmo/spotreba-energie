@@ -162,6 +162,10 @@ public class BeanTableModel<T> extends RowTableModel<T> {
         //  We have all the information we need, so save it for later use
         //  by the table model methods.
         DisplayPriority dp = theMethod.getAnnotation(DisplayPriority.class);
+        TableHidden hidden = theMethod.getAnnotation(TableHidden.class);
+        if (hidden != null) {
+            return;
+        }
         int displayPriority = Integer.MAX_VALUE;
         if (dp != null) {
             displayPriority = dp.priority();

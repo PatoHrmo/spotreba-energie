@@ -7,6 +7,9 @@ package sk.uniza.fri.pds.spotreba.energie.domain;
 
 import java.awt.image.BufferedImage;
 import java.io.Serializable;
+import org.metawidget.inspector.annotation.UiHidden;
+import sk.uniza.fri.pds.spotreba.energie.gui.DisplayPriority;
+import sk.uniza.fri.pds.spotreba.energie.gui.TableHidden;
 
 public class SeZamestnanec implements Serializable {
 
@@ -17,6 +20,8 @@ public class SeZamestnanec implements Serializable {
     private String rodCislo;
     private int idRegionu;
 
+    @DisplayPriority(priority = 1)
+    @UiHidden
     public int getIdZamestnanca() {
         return idZamestnanca;
     }
@@ -25,6 +30,7 @@ public class SeZamestnanec implements Serializable {
         this.idZamestnanca = idZamestnanca;
     }
 
+    @TableHidden
     public BufferedImage getFoto() {
         return foto;
     }
