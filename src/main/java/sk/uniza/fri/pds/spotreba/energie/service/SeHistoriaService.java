@@ -24,7 +24,15 @@ public class SeHistoriaService implements SeService<SeHistoria> {
 
     @Override
     public void create(SeHistoria object) {
-        System.out.println("");
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("BEGIN INSERT_SE_HISTORIA(?, ?, ?); END;");
+            stmnt.setInt(1, object.getCisloOdberatela());
+            stmnt.setInt(2, object.getCisZariadenia());
+            stmnt.setDate(3, Utils.utilDateToSqlDate(object.getDatumInstalacie()));
+            stmnt.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
