@@ -24,7 +24,15 @@ public class SeMestoService implements SeService<SeMesto> {
 
     @Override
     public void create(SeMesto object) {
-
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("BEGIN INSERT_SE_MESTO(?, ?, ?); END;");
+            stmnt.setInt(1, object.getIdRegionu());
+            stmnt.setString(2, object.getPsc());
+            stmnt.setString(3, object.getNazov());
+            stmnt.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
