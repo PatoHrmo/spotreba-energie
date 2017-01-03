@@ -24,7 +24,13 @@ public class SeRegionService implements SeService<SeRegion> {
 
     @Override
     public void create(SeRegion object) {
-
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("BEGIN INSERT_SE_REGION(?); END;");
+            stmnt.setString(1, object.getNazov());
+            stmnt.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
