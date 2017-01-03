@@ -24,7 +24,16 @@ public class SeOdpisService implements SeService<SeOdpis> {
 
     @Override
     public void create(SeOdpis object) {
-
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("BEGIN INSERT_SE_ODPIS(?, ?, ?, ?); END;");
+            stmnt.setDate(1, Utils.utilDateToSqlDate(object.getDatumOdpisu()));
+            stmnt.setInt(2, object.getCisZariadenia());
+            stmnt.setInt(3, object.getIdZamestanca());
+            stmnt.setInt(4, object.getStav());
+            stmnt.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
