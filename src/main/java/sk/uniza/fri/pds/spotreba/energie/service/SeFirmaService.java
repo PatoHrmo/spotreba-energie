@@ -24,7 +24,15 @@ public class SeFirmaService implements SeService<SeFirma> {
 
     @Override
     public void create(SeFirma object) {
-
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("BEGIN INSERT_SE_FIRMA(?, ?, ?); END;");
+            stmnt.setString(1, object.getIco());
+            stmnt.setInt(2, object.getIdAdresy());
+            stmnt.setString(3, object.getNazovFirmy());
+            stmnt.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
