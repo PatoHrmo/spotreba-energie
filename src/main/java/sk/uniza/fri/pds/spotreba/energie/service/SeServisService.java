@@ -26,7 +26,17 @@ public class SeServisService implements SeService<SeServis> {
 
     @Override
     public void create(SeServis object) {
-        System.out.println("");
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("BEGIN INSERT_SE_SERVIS(?, ?, ?, ?, ?); END;");
+            stmnt.setDate(1, Utils.utilDateToSqlDate(object.getDatumServisu()));
+            stmnt.setInt(2, object.getCisZariadenia());
+            stmnt.setString(3, object.getInfoServisu().getPopis());
+            stmnt.setString(4, new Character(object.getInfoServisu().getTyp_servisu()).toString());
+            stmnt.setInt(5, object.getInfoServisu().getSpotreba());
+            stmnt.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
