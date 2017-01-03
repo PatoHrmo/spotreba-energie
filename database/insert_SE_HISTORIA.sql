@@ -40,7 +40,9 @@ BEGIN
   SET spotreba = 0
   where CIS_ZARIADENIA = nove_cislo_zariadenia;
   INSERT INTO SE_HISTORIA VALUES (nove_cislo_odberatela, nove_cislo_zariadenia, novy_datum_instalacie, null);
-
+  EXCEPTION
+    WHEN zariadenie_sa_pouziva THEN
+        RAISE_APPLICATION_ERROR(-20001,'zariadenie sa pouziva');
   COMMIT;
 
 END;
