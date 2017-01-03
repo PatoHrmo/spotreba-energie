@@ -24,7 +24,16 @@ public class SeOdberatelService implements SeService<SeOdberatel> {
 
     @Override
     public void create(SeOdberatel object) {
-
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("BEGIN INSERT_SE_ODBERATEL(?, ?, ?, ?); END;");
+            stmnt.setString(1, object.getIco());
+            stmnt.setString(2, object.getRodCislo());
+            stmnt.setString(3, object.getTyp() == null ? null : object.getTyp().toString());
+            stmnt.setString(4, object.getKategoria() == null ? null : object.getKategoria().toString());
+            stmnt.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
