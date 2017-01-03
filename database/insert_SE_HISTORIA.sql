@@ -35,6 +35,10 @@ BEGIN
   IF novy_datum_instalacie < max_datum_odobratia then
   raise instalacia_pred_sucasnou;
   end if;
+  -- vynulujeme zariadenie ktore ideme nainstalovat 
+  UPDATE SE_ZARIADENIE 
+  SET spotreba = 0
+  where CIS_ZARIADENIA = nove_cislo_zariadenia;
   INSERT INTO SE_HISTORIA VALUES (nove_cislo_odberatela, nove_cislo_zariadenia, novy_datum_instalacie, null);
 
   COMMIT;
