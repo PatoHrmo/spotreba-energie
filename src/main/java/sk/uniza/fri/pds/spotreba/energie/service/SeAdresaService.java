@@ -24,7 +24,15 @@ public class SeAdresaService implements SeService<SeAdresa> {
 
     @Override
     public void create(SeAdresa object) {
-
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("BEGIN INSERT_SE_ADRESA(?, ?, ?); END;");
+            stmnt.setInt(1, object.getIdMesta());
+            stmnt.setString(2, object.getCislo());
+            stmnt.setString(3, object.getUlica());
+            stmnt.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
