@@ -9,3 +9,4 @@ delete from SE_HISTORIA where cis_zariadenia = cislo_odstraneneho_zariadenia;
 delete from SE_zariadenie where cis_zariadenia = cislo_odstraneneho_zariadenia;
 commit;
 end;
+/
