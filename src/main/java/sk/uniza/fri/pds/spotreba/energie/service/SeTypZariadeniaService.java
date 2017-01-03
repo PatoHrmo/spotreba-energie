@@ -24,7 +24,15 @@ public class SeTypZariadeniaService implements SeService<SeTypZariadenia> {
 
     @Override
     public void create(SeTypZariadenia object) {
-
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("BEGIN INSERT_SE_TYP_ZARIADENIA(?, ?, ?); END;");
+            stmnt.setString(1, object.getMeraciaVelicina());
+            stmnt.setInt(2, object.getCisloModelu());
+            stmnt.setString(3, object.getVyrobca());
+            stmnt.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
