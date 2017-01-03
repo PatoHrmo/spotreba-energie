@@ -24,7 +24,16 @@ public class SeOsobaService implements SeService<SeOsoba> {
 
     @Override
     public void create(SeOsoba object) {
-
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("BEGIN INSERT_SE_OSOBA(?, ?, ?, ?); END;");
+            stmnt.setString(1, object.getRodCislo());
+            stmnt.setInt(2, object.getIdAdresy());
+            stmnt.setString(3, object.getMeno());
+            stmnt.setString(4, object.getPriezvisko());
+            stmnt.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
