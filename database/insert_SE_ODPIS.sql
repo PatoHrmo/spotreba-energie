@@ -11,8 +11,8 @@ spotreba_nemoze_klesat EXCEPTION;
 odpis_vykonany_v_zlom_case EXCEPTION;
 datum_stareho_odpisu date;
 BEGIN
-  select max(stav) into posledny_odpis_stav 
-  from SE_ODPIS 
+  select spotreba into posledny_odpis_stav 
+  from SE_ZARIADENIE
   where cis_zariadenia = cislo_zariadenia;
   
   select max(datum_odpisu) into datum_stareho_odpisu

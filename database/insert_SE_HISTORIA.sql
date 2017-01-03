@@ -9,7 +9,9 @@ pouziva_sa integer;
 velicina_sa_uz_meria integer;
 zariadenie_sa_pouziva EXCEPTION;
 velicina_sa_meria EXCEPTION;
+instalacia_pred_sucasnou EXCEPTION;
 typ_meranej_veliciny_pristroja SE_TYP_ZARIADENIA.meracia_velicina%TYPE;
+max_datum_odobratia date;
 BEGIN
   -- kontrola ci nahodou odberatelovi nejdeme namontovat do domu zariadenie ktore ma iny odberatel
   IF JE_ZARIADENIE_POUZIVANE(nove_cislo_zariadenia)=1 THEN
@@ -23,7 +25,20 @@ BEGIN
   IF velicina_sa_uz_meria=1 THEN
   RAISE velicina_sa_meria;
   end if;
+  -- kontrola ci nejdeme nainstalovat zariadenie do minulosti. napr uzivatel mal zariadenie na vodu
+  -- 1.1.2015 až do 1.1.2017 a my sa pokusime nainstalovat zariadenie 1.1.2016
+  select max(datum_odobratia) into max_datum_odobratia
+  from SE_historia
+  where cislo_odberatela = nove_cislo_odberatela
+  and GET_TYP_VELICINY_ZARIADENIA(nove_cislo_zariadenia) = GET_TYP_VELICINY_ZARIADENIA(cis_zariadenia);
   
+  IF novy_datum_instalacie < max_datum_odobratia then
+  raise instalacia_pred_sucasnou;
+  end if;
+  -- vynulujeme zariadenie ktore ideme nainstalovat 
+  UPDATE SE_ZARIADENIE 
+  SET spotreba = 0
+  where CIS_ZARIADENIA = nove_cislo_zariadenia;
   INSERT INTO SE_HISTORIA VALUES (nove_cislo_odberatela, nove_cislo_zariadenia, novy_datum_instalacie, null);
 
   COMMIT;
