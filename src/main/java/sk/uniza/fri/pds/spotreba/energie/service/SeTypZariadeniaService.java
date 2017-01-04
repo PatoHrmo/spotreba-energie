@@ -56,8 +56,8 @@ public class SeTypZariadeniaService implements SeService<SeTypZariadenia> {
     }
 
     @Override
-    public void update(SeTypZariadenia object) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void update(SeTypZariadenia old, SeTypZariadenia object) {
+        throw new RuntimeException("Pre túto tabuľku bola táto funkcionalita zablokovaná!");
     }
 
     @Override

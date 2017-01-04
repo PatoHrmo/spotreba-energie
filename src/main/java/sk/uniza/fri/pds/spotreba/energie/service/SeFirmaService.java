@@ -55,8 +55,17 @@ public class SeFirmaService implements SeService<SeFirma> {
     }
 
     @Override
-    public void update(SeFirma object) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void update(SeFirma old, SeFirma object) {
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("BEGIN UPDATE_SE_FIRMA(?, ?, ?, ?); END;");
+            stmnt.setString(1, old.getIco());
+            stmnt.setString(2, object.getIco());
+            stmnt.setInt(3, object.getIdAdresy());
+            stmnt.setString(4, object.getNazovFirmy());
+            stmnt.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

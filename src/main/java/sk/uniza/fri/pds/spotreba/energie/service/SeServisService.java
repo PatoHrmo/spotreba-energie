@@ -65,8 +65,18 @@ public class SeServisService implements SeService<SeServis> {
     }
 
     @Override
-    public void update(SeServis object) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void update(SeServis old, SeServis object) {
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("BEGIN UPDATE_SE_SERVIS(?, ?, ?, ?, ?); END;");
+            stmnt.setDate(1, Utils.utilDateToSqlDate(old.getDatumServisu()));
+            stmnt.setInt(2, old.getCisZariadenia());
+            stmnt.setString(3, object.getInfoServisu().getPopis());
+            stmnt.setString(4, object.getInfoServisu().getTyp_servisu().toString());
+            stmnt.setInt(5, object.getInfoServisu().getSpotreba());
+            stmnt.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

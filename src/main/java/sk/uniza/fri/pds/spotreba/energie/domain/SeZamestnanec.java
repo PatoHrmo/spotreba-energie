@@ -16,7 +16,7 @@ public class SeZamestnanec implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private int idZamestnanca;
-    private BufferedImage foto;
+    private transient BufferedImage foto;
     private String rodCislo;
     private int idRegionu;
 
