@@ -61,7 +61,13 @@ public class SeFirmaService implements SeService<SeFirma> {
 
     @Override
     public void delete(SeFirma object) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("BEGIN DELETE_SE_FIRMA(?); END;");
+            stmnt.setString(1, object.getIco());
+            stmnt.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static synchronized SeFirmaService getInstance() {

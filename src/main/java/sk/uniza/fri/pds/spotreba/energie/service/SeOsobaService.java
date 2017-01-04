@@ -63,7 +63,13 @@ public class SeOsobaService implements SeService<SeOsoba> {
 
     @Override
     public void delete(SeOsoba object) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("BEGIN DELETE_SE_OSOBA(?); END;");
+            stmnt.setString(1, object.getRodCislo());
+            stmnt.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static synchronized SeOsobaService getInstance() {

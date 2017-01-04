@@ -58,7 +58,13 @@ public class SeRegionService implements SeService<SeRegion> {
 
     @Override
     public void delete(SeRegion object) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("BEGIN DELETE_SE_REGION(?); END;");
+            stmnt.setInt(1, object.getIdRegionu());
+            stmnt.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static synchronized SeRegionService getInstance() {

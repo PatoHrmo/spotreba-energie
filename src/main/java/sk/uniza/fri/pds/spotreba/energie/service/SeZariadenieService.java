@@ -59,7 +59,13 @@ public class SeZariadenieService implements SeService<SeZariadenie> {
 
     @Override
     public void delete(SeZariadenie object) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("BEGIN DELETE_SE_ZARIADENIE(?); END;");
+            stmnt.setInt(1, object.getCisZariadenia());
+            stmnt.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static synchronized SeZariadenieService getInstance() {

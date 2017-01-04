@@ -93,7 +93,13 @@ public class SeZamestnanecService implements SeService<SeZamestnanec> {
 
     @Override
     public void delete(SeZamestnanec object) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("BEGIN DELETE_SE_ZAMESTNANEC(?); END;");
+            stmnt.setInt(1, object.getIdZamestnanca());
+            stmnt.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static synchronized SeZamestnanecService getInstance() {

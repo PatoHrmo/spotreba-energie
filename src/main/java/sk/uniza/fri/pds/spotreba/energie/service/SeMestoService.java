@@ -62,7 +62,13 @@ public class SeMestoService implements SeService<SeMesto> {
 
     @Override
     public void delete(SeMesto object) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("BEGIN DELETE_SE_MESTO(?); END;");
+            stmnt.setInt(1, object.getIdMesta());
+            stmnt.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static synchronized SeMestoService getInstance() {
