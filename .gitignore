@@ -61,3 +61,4 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+src/main/java/sk/uniza/fri/pds/spotreba/energie/OracleJDBCConnector.java

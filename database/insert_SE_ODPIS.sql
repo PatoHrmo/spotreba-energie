@@ -34,6 +34,12 @@ BEGIN
   INSERT INTO SE_ODPIS VALUES (datum_odpisu, cislo_zariadenia, id_zamestnanca, novy_Stav);
 
   COMMIT;
+  
+  EXCEPTION
+    WHEN spotreba_nemoze_klesat THEN
+        RAISE_APPLICATION_ERROR(-20001,'bola namerana nizsia spotreba ako v minulosti');
+    WHEN odpis_vykonany_v_zlom_case THEN
+        RAISE_APPLICATION_ERROR(-20002,'odpis vykonany pred ostatnymi odpismy');
 
 END;
 /
