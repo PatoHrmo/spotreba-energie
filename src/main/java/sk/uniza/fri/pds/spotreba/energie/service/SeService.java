@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface SeService<T> {
 
-    void update(T object);
+    void update(T oldObject, T object);
 
     void create(T object);
 

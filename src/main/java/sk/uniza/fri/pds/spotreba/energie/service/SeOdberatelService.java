@@ -58,8 +58,15 @@ public class SeOdberatelService implements SeService<SeOdberatel> {
     }
 
     @Override
-    public void update(SeOdberatel object) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void update(SeOdberatel old, SeOdberatel object) {
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("BEGIN UPDATE_SE_ODBERATEL(?, ?); END;");
+            stmnt.setInt(1, old.getCisloOdberatela());
+            stmnt.setString(2, object.getKategoria() == null ? null : object.getKategoria().toString());
+            stmnt.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

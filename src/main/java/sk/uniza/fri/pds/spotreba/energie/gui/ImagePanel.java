@@ -26,7 +26,13 @@ public class ImagePanel extends javax.swing.JPanel {
 
     public void setImage(BufferedImage bi) {
         this.bi = bi;
-        jLabel1.setIcon(new ImageIcon(bi));
+        jLabel1.setIcon(bi == null ? null : new ImageIcon(bi));
+        if (bi != null) {
+            jButton2.setVisible(true);
+        } else {
+            jButton2.setVisible(false);
+
+        }
         BufferedImage oldImage = bi;
         pcs.forEach((listener) -> {
             listener.propertyChange(new PropertyChangeEvent(this, "image", oldImage, bi));
@@ -54,6 +60,7 @@ public class ImagePanel extends javax.swing.JPanel {
     public ImagePanel() {
 
         initComponents();
+        jButton2.setVisible(false);
     }
 
     /**
@@ -68,6 +75,7 @@ public class ImagePanel extends javax.swing.JPanel {
         fileChoser = new javax.swing.JFileChooser();
         jLabel1 = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
+        jButton2 = new javax.swing.JButton();
 
         java.awt.GridBagLayout layout = new java.awt.GridBagLayout();
         layout.columnWeights = new double[] {1.0};
@@ -82,6 +90,14 @@ public class ImagePanel extends javax.swing.JPanel {
             }
         });
         add(jButton1, new java.awt.GridBagConstraints());
+
+        jButton2.setText("X");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+        add(jButton2, new java.awt.GridBagConstraints());
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
@@ -110,9 +126,14 @@ public class ImagePanel extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_jButton1ActionPerformed
 
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        setImage(null);
+    }//GEN-LAST:event_jButton2ActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JFileChooser fileChoser;
     private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     // End of variables declaration//GEN-END:variables
 }

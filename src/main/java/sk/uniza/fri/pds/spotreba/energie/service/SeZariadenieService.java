@@ -53,8 +53,8 @@ public class SeZariadenieService implements SeService<SeZariadenie> {
     }
 
     @Override
-    public void update(SeZariadenie object) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void update(SeZariadenie old, SeZariadenie object) {
+        throw new RuntimeException("Pre túto tabuľku bola táto funkcionalita zablokovaná!");
     }
 
     @Override

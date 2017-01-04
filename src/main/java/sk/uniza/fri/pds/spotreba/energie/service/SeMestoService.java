@@ -56,8 +56,17 @@ public class SeMestoService implements SeService<SeMesto> {
     }
 
     @Override
-    public void update(SeMesto object) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void update(SeMesto old, SeMesto object) {
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("BEGIN UPDATE_SE_MESTO(?, ?, ?, ?); END;");
+            stmnt.setInt(1, old.getIdMesta());
+            stmnt.setInt(2, object.getIdRegionu());
+            stmnt.setString(3, object.getPsc());
+            stmnt.setString(4, object.getNazov());
+            stmnt.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

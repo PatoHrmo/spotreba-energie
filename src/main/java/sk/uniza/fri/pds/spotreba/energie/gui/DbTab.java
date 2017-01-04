@@ -9,6 +9,7 @@ import com.toedter.calendar.JDateChooser;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Date;
@@ -22,6 +23,7 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import org.apache.commons.lang3.SerializationUtils;
 import org.jdesktop.beansbinding.AutoBinding.UpdateStrategy;
 import org.metawidget.swing.SwingMetawidget;
 import org.metawidget.swing.widgetbuilder.OverriddenWidgetBuilder;
@@ -42,6 +44,8 @@ public class DbTab extends javax.swing.JPanel {
 
     private BeanTableModel tableModel;
     private Class clazz;
+
+    private Object oldObj;
 
     private SeService service;
 
@@ -119,6 +123,7 @@ public class DbTab extends javax.swing.JPanel {
                 public void valueChanged(ListSelectionEvent event) {
                     if (jTable.getSelectedRow() > -1) {
                         Object row = ((BeanTableModel) jTable.getModel()).getRow(jTable.getSelectedRow());
+                        oldObj = SerializationUtils.clone((Serializable) row);
                         metawidget.setToInspect(row);
                     }
                 }
@@ -247,6 +252,7 @@ public class DbTab extends javax.swing.JPanel {
         try {
             metawidget.setToInspect(clazz.newInstance());
             jTable.clearSelection();
+            oldObj = null;
         } catch (InstantiationException | IllegalAccessException ex) {
             Logger.getLogger(DbTab.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -296,7 +302,7 @@ public class DbTab extends javax.swing.JPanel {
             @Override
             protected Boolean doInBackground() throws Exception {
                 try {
-                    service.update(metawidget.getToInspect());
+                    service.update(oldObj, metawidget.getToInspect());
                     return true;
                 } catch (RuntimeException e) {
                     publish(e);
