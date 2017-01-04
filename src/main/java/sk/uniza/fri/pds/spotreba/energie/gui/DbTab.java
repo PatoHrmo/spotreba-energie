@@ -142,6 +142,7 @@ public class DbTab extends javax.swing.JPanel {
         bot = new javax.swing.JPanel();
         metawidget = new org.metawidget.swing.SwingMetawidget();
         buttons = new javax.swing.JPanel();
+        deleteButton = new javax.swing.JButton();
         newButton = new javax.swing.JButton();
         loadButton = new javax.swing.JButton();
         saveButton = new javax.swing.JButton();
@@ -155,6 +156,14 @@ public class DbTab extends javax.swing.JPanel {
 
         bot.setLayout(new java.awt.BorderLayout());
         bot.add(metawidget, java.awt.BorderLayout.PAGE_START);
+
+        deleteButton.setText("Delete");
+        deleteButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                deleteButtonActionPerformed(evt);
+            }
+        });
+        buttons.add(deleteButton);
 
         newButton.setText("New");
         newButton.addActionListener(new java.awt.event.ActionListener() {
@@ -243,6 +252,14 @@ public class DbTab extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_newButtonActionPerformed
 
+    private void deleteButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteButtonActionPerformed
+        if (service != null) {
+            if (jTable.getSelectedRow() > -1) {
+                delete();
+            }
+        }
+    }//GEN-LAST:event_deleteButtonActionPerformed
+
     private void create() {
         new SwingWorker<Boolean, RuntimeException>() {
             @Override
@@ -300,12 +317,45 @@ public class DbTab extends javax.swing.JPanel {
         }.execute();
     }
 
+    private void delete() {
+        new SwingWorker<Boolean, RuntimeException>() {
+            @Override
+            protected Boolean doInBackground() throws Exception {
+                try {
+                    service.delete(metawidget.getToInspect());
+                    return true;
+                } catch (RuntimeException e) {
+                    publish(e);
+                }
+                return false;
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    if (get()) {
+                        newButtonActionPerformed(null);
+                    }
+                } catch (InterruptedException | ExecutionException ex) {
+                    Logger.getLogger(DbTab.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+            }
+
+            @Override
+            protected void process(List<RuntimeException> chunks) {
+                showException("Chyba", chunks.get(0));
+            }
+        }.execute();
+    }
+
     private void showException(String message, Exception e) {
         JOptionPane.showMessageDialog(null, e.getMessage(), message, JOptionPane.ERROR_MESSAGE);
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel bot;
     private javax.swing.JPanel buttons;
+    private javax.swing.JButton deleteButton;
     private javax.swing.JTable jTable;
     private javax.swing.JButton loadButton;
     private org.metawidget.swing.SwingMetawidget metawidget;
