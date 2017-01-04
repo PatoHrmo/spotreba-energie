@@ -275,7 +275,13 @@ public class DbTab extends javax.swing.JPanel {
 
             @Override
             protected void done() {
-                // a co teraz?
+                try {
+                    if (get()) {
+                        load();
+                    }
+                } catch (InterruptedException | ExecutionException ex) {
+                    Logger.getLogger(DbTab.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
 
             @Override
@@ -334,6 +340,7 @@ public class DbTab extends javax.swing.JPanel {
             protected void done() {
                 try {
                     if (get()) {
+                        load();
                         newButtonActionPerformed(null);
                     }
                 } catch (InterruptedException | ExecutionException ex) {
