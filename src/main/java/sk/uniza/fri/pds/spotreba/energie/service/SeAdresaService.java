@@ -56,13 +56,28 @@ public class SeAdresaService implements SeService<SeAdresa> {
     }
 
     @Override
-    public void update(SeAdresa object) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void update(SeAdresa old, SeAdresa object) {
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("BEGIN UPDATE_SE_ADRESA(?, ?, ?, ?); END;");
+            stmnt.setInt(1, old.getIdAdresy());
+            stmnt.setInt(2, object.getIdMesta());
+            stmnt.setString(3, object.getCislo());
+            stmnt.setString(4, object.getUlica());
+            stmnt.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public void delete(SeAdresa object) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("BEGIN DELETE_SE_ADRESA(?); END;");
+            stmnt.setInt(1, object.getIdAdresy());
+            stmnt.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static synchronized SeAdresaService getInstance() {

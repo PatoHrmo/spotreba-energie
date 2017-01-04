@@ -56,13 +56,19 @@ public class SeTypZariadeniaService implements SeService<SeTypZariadenia> {
     }
 
     @Override
-    public void update(SeTypZariadenia object) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void update(SeTypZariadenia old, SeTypZariadenia object) {
+        throw new RuntimeException("Pre túto tabuľku bola táto funkcionalita zablokovaná!");
     }
 
     @Override
     public void delete(SeTypZariadenia object) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("BEGIN DELETE_SE_TYP_ZARIADENIA(?); END;");
+            stmnt.setInt(1, object.getTyp());
+            stmnt.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static synchronized SeTypZariadeniaService getInstance() {

@@ -57,13 +57,22 @@ public class SeOdpisService implements SeService<SeOdpis> {
     }
 
     @Override
-    public void update(SeOdpis object) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void update(SeOdpis old, SeOdpis object) {
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("BEGIN UPDATE_SE_ODPIS(?, ?, ?, ?); END;");
+            stmnt.setDate(1, Utils.utilDateToSqlDate(old.getDatumOdpisu()));
+            stmnt.setInt(2, old.getCisZariadenia());
+            stmnt.setInt(3, object.getIdZamestanca());
+            stmnt.setInt(4, object.getStav());
+            stmnt.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public void delete(SeOdpis object) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new RuntimeException("Pre túto tabuľku bola táto funkcionalita zablokovaná!");
     }
 
     public static synchronized SeOdpisService getInstance() {

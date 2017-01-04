@@ -15,8 +15,10 @@ BEGIN
   RAISE spotreba_nemoze_klesat;
   END IF;
   INSERT INTO SE_SERVIS VALUES (datum_servisu, cislo_zariadenia, t_info_servisu(popis, typ_servisu, namerana_spotreba));
-
+  
   COMMIT;
-
+  EXCEPTION
+  WHEN spotreba_nemoze_klesat THEN
+    RAISE_APPLICATION_ERROR(-20001,'spotreba od minuleho merania klesla');
 END;
 /

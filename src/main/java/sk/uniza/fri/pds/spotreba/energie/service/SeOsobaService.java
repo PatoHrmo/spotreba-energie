@@ -57,13 +57,29 @@ public class SeOsobaService implements SeService<SeOsoba> {
     }
 
     @Override
-    public void update(SeOsoba object) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void update(SeOsoba old, SeOsoba object) {
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("BEGIN UPDATE_SE_OSOBA(?, ?, ?, ?, ?); END;");
+            stmnt.setString(1, old.getRodCislo());
+            stmnt.setString(2, object.getRodCislo());
+            stmnt.setInt(3, object.getIdAdresy());
+            stmnt.setString(4, object.getMeno());
+            stmnt.setString(5, object.getPriezvisko());
+            stmnt.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public void delete(SeOsoba object) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("BEGIN DELETE_SE_OSOBA(?); END;");
+            stmnt.setString(1, object.getRodCislo());
+            stmnt.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static synchronized SeOsobaService getInstance() {

@@ -61,6 +61,9 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
 target/classes/sk/uniza/fri/pds/spotreba/energie/gui/DbTab.form
 target/classes/sk/uniza/fri/pds/spotreba/energie/gui/MainGui.form
 target/classes/sk/uniza/fri/pds/spotreba/energie/gui/ImagePanel.form
+src/main/java/sk/uniza/fri/pds/spotreba/energie/OracleJDBCConnector.java
+

@@ -56,13 +56,13 @@ public class SeHistoriaService implements SeService<SeHistoria> {
     }
 
     @Override
-    public void update(SeHistoria object) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void update(SeHistoria old, SeHistoria object) {
+        throw new RuntimeException("Pre túto tabuľku bola táto funkcionalita zablokovaná!");
     }
 
     @Override
     public void delete(SeHistoria object) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new RuntimeException("Pre túto tabuľku bola táto funkcionalita zablokovaná!");
     }
 
     public static synchronized SeHistoriaService getInstance() {

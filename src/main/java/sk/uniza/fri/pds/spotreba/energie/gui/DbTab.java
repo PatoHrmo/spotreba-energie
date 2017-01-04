@@ -9,6 +9,7 @@ import com.toedter.calendar.JDateChooser;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Date;
@@ -22,6 +23,7 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import org.apache.commons.lang3.SerializationUtils;
 import org.jdesktop.beansbinding.AutoBinding.UpdateStrategy;
 import org.metawidget.swing.SwingMetawidget;
 import org.metawidget.swing.widgetbuilder.OverriddenWidgetBuilder;
@@ -42,6 +44,8 @@ public class DbTab extends javax.swing.JPanel {
 
     private BeanTableModel tableModel;
     private Class clazz;
+
+    private Object oldObj;
 
     private SeService service;
 
@@ -119,6 +123,7 @@ public class DbTab extends javax.swing.JPanel {
                 public void valueChanged(ListSelectionEvent event) {
                     if (jTable.getSelectedRow() > -1) {
                         Object row = ((BeanTableModel) jTable.getModel()).getRow(jTable.getSelectedRow());
+                        oldObj = SerializationUtils.clone((Serializable) row);
                         metawidget.setToInspect(row);
                     }
                 }
@@ -142,6 +147,7 @@ public class DbTab extends javax.swing.JPanel {
         bot = new javax.swing.JPanel();
         metawidget = new org.metawidget.swing.SwingMetawidget();
         buttons = new javax.swing.JPanel();
+        deleteButton = new javax.swing.JButton();
         newButton = new javax.swing.JButton();
         loadButton = new javax.swing.JButton();
         saveButton = new javax.swing.JButton();
@@ -155,6 +161,14 @@ public class DbTab extends javax.swing.JPanel {
 
         bot.setLayout(new java.awt.BorderLayout());
         bot.add(metawidget, java.awt.BorderLayout.PAGE_START);
+
+        deleteButton.setText("Delete");
+        deleteButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                deleteButtonActionPerformed(evt);
+            }
+        });
+        buttons.add(deleteButton);
 
         newButton.setText("New");
         newButton.addActionListener(new java.awt.event.ActionListener() {
@@ -238,10 +252,19 @@ public class DbTab extends javax.swing.JPanel {
         try {
             metawidget.setToInspect(clazz.newInstance());
             jTable.clearSelection();
+            oldObj = null;
         } catch (InstantiationException | IllegalAccessException ex) {
             Logger.getLogger(DbTab.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_newButtonActionPerformed
+
+    private void deleteButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteButtonActionPerformed
+        if (service != null) {
+            if (jTable.getSelectedRow() > -1) {
+                delete();
+            }
+        }
+    }//GEN-LAST:event_deleteButtonActionPerformed
 
     private void create() {
         new SwingWorker<Boolean, RuntimeException>() {
@@ -258,7 +281,13 @@ public class DbTab extends javax.swing.JPanel {
 
             @Override
             protected void done() {
-                // a co teraz?
+                try {
+                    if (get()) {
+                        load();
+                    }
+                } catch (InterruptedException | ExecutionException ex) {
+                    Logger.getLogger(DbTab.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
 
             @Override
@@ -273,7 +302,7 @@ public class DbTab extends javax.swing.JPanel {
             @Override
             protected Boolean doInBackground() throws Exception {
                 try {
-                    service.update(metawidget.getToInspect());
+                    service.update(oldObj, metawidget.getToInspect());
                     return true;
                 } catch (RuntimeException e) {
                     publish(e);
@@ -300,12 +329,46 @@ public class DbTab extends javax.swing.JPanel {
         }.execute();
     }
 
+    private void delete() {
+        new SwingWorker<Boolean, RuntimeException>() {
+            @Override
+            protected Boolean doInBackground() throws Exception {
+                try {
+                    service.delete(metawidget.getToInspect());
+                    return true;
+                } catch (RuntimeException e) {
+                    publish(e);
+                }
+                return false;
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    if (get()) {
+                        load();
+                        newButtonActionPerformed(null);
+                    }
+                } catch (InterruptedException | ExecutionException ex) {
+                    Logger.getLogger(DbTab.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+            }
+
+            @Override
+            protected void process(List<RuntimeException> chunks) {
+                showException("Chyba", chunks.get(0));
+            }
+        }.execute();
+    }
+
     private void showException(String message, Exception e) {
         JOptionPane.showMessageDialog(null, e.getMessage(), message, JOptionPane.ERROR_MESSAGE);
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel bot;
     private javax.swing.JPanel buttons;
+    private javax.swing.JButton deleteButton;
     private javax.swing.JTable jTable;
     private javax.swing.JButton loadButton;
     private org.metawidget.swing.SwingMetawidget metawidget;
