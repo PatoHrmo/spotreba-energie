@@ -7,5 +7,9 @@ create or replace function get_spotreba_za_obdobie(
 return number;
 is 
 begin
-  
+  select stav from SE_ODPIS join SE_HISTORIA USING (cis_zariadenia)
+              join SE_ZARIADENIE USING (cis_zariadenia)
+              join SE_TYP_ZARIADENIA USING (typ)
+  where cislo_odberatela = pa_cislo_odberatela
+        and velicina = pa_velicina
 end;
