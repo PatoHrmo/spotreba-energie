@@ -5,7 +5,13 @@
  */
 package sk.uniza.fri.pds.spotreba.energie.service;
 
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.LinkedList;
 import java.util.List;
+import sk.uniza.fri.pds.spotreba.energie.OracleJDBCConnector;
 import sk.uniza.fri.pds.spotreba.energie.domain.SeOdberatel;
 
 public class SeOdberatelService implements SeService<SeOdberatel> {
@@ -18,23 +24,60 @@ public class SeOdberatelService implements SeService<SeOdberatel> {
 
     @Override
     public void create(SeOdberatel object) {
-
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("BEGIN INSERT_SE_ODBERATEL(?, ?, ?, ?); END;");
+            stmnt.setString(1, object.getIco());
+            stmnt.setString(2, object.getRodCislo());
+            stmnt.setString(3, object.getTyp() == null ? null : object.getTyp().toString());
+            stmnt.setString(4, object.getKategoria() == null ? null : object.getKategoria().toString());
+            stmnt.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public List<SeOdberatel> findAll() {
-
-        return null;
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("SELECT * FROM SE_ODBERATEL ORDER BY CISLO_ODBERATELA ASC");
+            ResultSet result = stmnt.executeQuery();
+            List<SeOdberatel> output = new LinkedList<>();
+            while (result.next()) {
+                SeOdberatel o = new SeOdberatel();
+                o.setCisloOdberatela(result.getInt("CISLO_ODBERATELA"));
+                o.setIco(result.getString("ICO"));
+                o.setKategoria(result.getString("KATEGORIA").charAt(0));
+                o.setRodCislo(result.getString("ROD_CISLO"));
+                o.setTyp(result.getString("TYP").charAt(0));
+                output.add(o);
+            }
+            return output;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
-    public void update(SeOdberatel object) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void update(SeOdberatel old, SeOdberatel object) {
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("BEGIN UPDATE_SE_ODBERATEL(?, ?); END;");
+            stmnt.setInt(1, old.getCisloOdberatela());
+            stmnt.setString(2, object.getKategoria() == null ? null : object.getKategoria().toString());
+            stmnt.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public void delete(SeOdberatel object) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("BEGIN DELETE_SE_ODBERATEL(?); END;");
+            stmnt.setInt(1, object.getCisloOdberatela());
+            stmnt.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static synchronized SeOdberatelService getInstance() {

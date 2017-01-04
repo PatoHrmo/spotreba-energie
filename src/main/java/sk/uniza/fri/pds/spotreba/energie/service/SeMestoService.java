@@ -5,7 +5,13 @@
  */
 package sk.uniza.fri.pds.spotreba.energie.service;
 
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.LinkedList;
 import java.util.List;
+import sk.uniza.fri.pds.spotreba.energie.OracleJDBCConnector;
 import sk.uniza.fri.pds.spotreba.energie.domain.SeMesto;
 
 public class SeMestoService implements SeService<SeMesto> {
@@ -18,23 +24,60 @@ public class SeMestoService implements SeService<SeMesto> {
 
     @Override
     public void create(SeMesto object) {
-
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("BEGIN INSERT_SE_MESTO(?, ?, ?); END;");
+            stmnt.setInt(1, object.getIdRegionu());
+            stmnt.setString(2, object.getPsc());
+            stmnt.setString(3, object.getNazov());
+            stmnt.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public List<SeMesto> findAll() {
-
-        return null;
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("SELECT * FROM SE_MESTO ORDER BY ID_MESTA ASC");
+            ResultSet result = stmnt.executeQuery();
+            List<SeMesto> output = new LinkedList<>();
+            while (result.next()) {
+                SeMesto o = new SeMesto();
+                o.setIdMesta(result.getInt("ID_MESTA"));
+                o.setIdRegionu(result.getInt("ID_REGIONU"));
+                o.setNazov(result.getString("NAZOV"));
+                o.setPsc(result.getString("PSC"));
+                output.add(o);
+            }
+            return output;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
-    public void update(SeMesto object) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void update(SeMesto old, SeMesto object) {
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("BEGIN UPDATE_SE_MESTO(?, ?, ?, ?); END;");
+            stmnt.setInt(1, old.getIdMesta());
+            stmnt.setInt(2, object.getIdRegionu());
+            stmnt.setString(3, object.getPsc());
+            stmnt.setString(4, object.getNazov());
+            stmnt.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public void delete(SeMesto object) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("BEGIN DELETE_SE_MESTO(?); END;");
+            stmnt.setInt(1, object.getIdMesta());
+            stmnt.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static synchronized SeMestoService getInstance() {

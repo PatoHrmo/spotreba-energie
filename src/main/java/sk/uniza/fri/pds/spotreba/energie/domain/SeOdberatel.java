@@ -6,6 +6,8 @@
 package sk.uniza.fri.pds.spotreba.energie.domain;
 
 import java.io.Serializable;
+import org.metawidget.inspector.annotation.UiHidden;
+import sk.uniza.fri.pds.spotreba.energie.gui.DisplayPriority;
 
 public class SeOdberatel implements Serializable {
 
@@ -16,6 +18,8 @@ public class SeOdberatel implements Serializable {
     private String ico;
     private String rodCislo;
 
+    @DisplayPriority(priority = 1)
+    @UiHidden
     public int getCisloOdberatela() {
         return cisloOdberatela;
     }

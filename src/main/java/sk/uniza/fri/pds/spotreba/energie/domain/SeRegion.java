@@ -6,6 +6,8 @@
 package sk.uniza.fri.pds.spotreba.energie.domain;
 
 import java.io.Serializable;
+import org.metawidget.inspector.annotation.UiHidden;
+import sk.uniza.fri.pds.spotreba.energie.gui.DisplayPriority;
 
 public class SeRegion implements Serializable {
 
@@ -13,6 +15,8 @@ public class SeRegion implements Serializable {
     private int idRegionu;
     private String nazov;
 
+    @DisplayPriority(priority = 1)
+    @UiHidden
     public int getIdRegionu() {
         return idRegionu;
     }

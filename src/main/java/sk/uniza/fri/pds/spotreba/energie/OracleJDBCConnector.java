@@ -23,8 +23,8 @@ public class OracleJDBCConnector {
 
         try {
             Connection connection = DriverManager.getConnection(
-                    "jdbc:oracle:thin:@localhost:1521:xe", "patrik",
-                    "prestigio1");
+                    "jdbc:oracle:thin:@localhost:1521:xe", "jdbc",
+                    "semestralka");
             System.out.println("You madee it, take control your database now!");
             return connection;
 

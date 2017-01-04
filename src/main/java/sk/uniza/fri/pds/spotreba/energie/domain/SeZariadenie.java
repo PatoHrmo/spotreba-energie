@@ -6,6 +6,8 @@
 package sk.uniza.fri.pds.spotreba.energie.domain;
 
 import java.io.Serializable;
+import org.metawidget.inspector.annotation.UiHidden;
+import sk.uniza.fri.pds.spotreba.energie.gui.DisplayPriority;
 
 public class SeZariadenie implements Serializable {
 
@@ -14,6 +16,8 @@ public class SeZariadenie implements Serializable {
     private int spotreba;
     private int typ;
 
+    @DisplayPriority(priority = 1)
+    @UiHidden
     public int getCisZariadenia() {
         return cisZariadenia;
     }

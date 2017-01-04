@@ -24,13 +24,21 @@ public class SeAdresaService implements SeService<SeAdresa> {
 
     @Override
     public void create(SeAdresa object) {
-
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("BEGIN INSERT_SE_ADRESA(?, ?, ?); END;");
+            stmnt.setInt(1, object.getIdMesta());
+            stmnt.setString(2, object.getCislo());
+            stmnt.setString(3, object.getUlica());
+            stmnt.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public List<SeAdresa> findAll() {
         try (Connection connection = OracleJDBCConnector.getConnection();) {
-            CallableStatement stmnt = connection.prepareCall("SELECT * FROM SE_ADRESA");
+            CallableStatement stmnt = connection.prepareCall("SELECT * FROM SE_ADRESA ORDER BY ID_ADRESY ASC");
             ResultSet result = stmnt.executeQuery();
             List<SeAdresa> output = new LinkedList<>();
             while (result.next()) {
@@ -43,19 +51,33 @@ public class SeAdresaService implements SeService<SeAdresa> {
             }
             return output;
         } catch (SQLException e) {
-
+            throw new RuntimeException(e);
         }
-        return null;
     }
 
     @Override
-    public void update(SeAdresa object) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void update(SeAdresa old, SeAdresa object) {
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("BEGIN UPDATE_SE_ADRESA(?, ?, ?, ?); END;");
+            stmnt.setInt(1, old.getIdAdresy());
+            stmnt.setInt(2, object.getIdMesta());
+            stmnt.setString(3, object.getCislo());
+            stmnt.setString(4, object.getUlica());
+            stmnt.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public void delete(SeAdresa object) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("BEGIN DELETE_SE_ADRESA(?); END;");
+            stmnt.setInt(1, object.getIdAdresy());
+            stmnt.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static synchronized SeAdresaService getInstance() {

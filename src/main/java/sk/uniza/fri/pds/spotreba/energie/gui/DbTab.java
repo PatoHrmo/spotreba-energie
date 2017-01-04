@@ -6,8 +6,10 @@
 package sk.uniza.fri.pds.spotreba.energie.gui;
 
 import com.toedter.calendar.JDateChooser;
+import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Date;
@@ -17,10 +19,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JComponent;
+import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.table.AbstractTableModel;
+import org.apache.commons.lang3.SerializationUtils;
 import org.jdesktop.beansbinding.AutoBinding.UpdateStrategy;
 import org.metawidget.swing.SwingMetawidget;
 import org.metawidget.swing.widgetbuilder.OverriddenWidgetBuilder;
@@ -41,6 +44,8 @@ public class DbTab extends javax.swing.JPanel {
 
     private BeanTableModel tableModel;
     private Class clazz;
+
+    private Object oldObj;
 
     private SeService service;
 
@@ -64,7 +69,7 @@ public class DbTab extends javax.swing.JPanel {
             metawidget.setWidgetBuilder(new CompositeWidgetBuilder<>(new CompositeWidgetBuilderConfig()
                     .setWidgetBuilders(
                             new OverriddenWidgetBuilder(), new ReadOnlyWidgetBuilder(),
-                            new WidgetBuilders.DateWidgetBuilder(), new SwingWidgetBuilder()
+                            new WidgetBuilders.DateWidgetBuilder(), new WidgetBuilders.ImageWidgetBuilder(), new SwingWidgetBuilder()
                     )));
             metawidget.addWidgetProcessor(new BeansBindingProcessor(
                     new BeansBindingProcessorConfig()
@@ -73,7 +78,24 @@ public class DbTab extends javax.swing.JPanel {
             metawidget.addWidgetProcessor(new WidgetProcessor<JComponent, SwingMetawidget>() {
                 @Override
                 public JComponent processWidget(JComponent w, String string, Map<String, String> map, SwingMetawidget m) {
-                    if (w instanceof JDateChooser) {
+                    if (w instanceof ImagePanel) {
+                        ((ImagePanel) w).addPropertyChangeListener(new PropertyChangeListener() {
+                            @Override
+                            public void propertyChange(PropertyChangeEvent e) {
+                                if ("image".equals(e.getPropertyName())) {
+                                    try {
+                                        Object o;
+                                        o = m.getToInspect();
+                                        final String name = map.get("name");
+                                        Method method = o.getClass().getMethod("set" + name.substring(0, 1).toUpperCase() + name.substring(1), BufferedImage.class);
+                                        method.invoke(o, e.getNewValue());
+                                    } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+                                        Logger.getLogger(DbTab.class.getName()).log(Level.SEVERE, null, ex);
+                                    }
+                                }
+                            }
+                        });
+                    } else if (w instanceof JDateChooser) {
                         ((JDateChooser) w).getDateEditor().addPropertyChangeListener(new PropertyChangeListener() {
                             @Override
                             public void propertyChange(PropertyChangeEvent e) {
@@ -101,6 +123,7 @@ public class DbTab extends javax.swing.JPanel {
                 public void valueChanged(ListSelectionEvent event) {
                     if (jTable.getSelectedRow() > -1) {
                         Object row = ((BeanTableModel) jTable.getModel()).getRow(jTable.getSelectedRow());
+                        oldObj = SerializationUtils.clone((Serializable) row);
                         metawidget.setToInspect(row);
                     }
                 }
@@ -124,6 +147,7 @@ public class DbTab extends javax.swing.JPanel {
         bot = new javax.swing.JPanel();
         metawidget = new org.metawidget.swing.SwingMetawidget();
         buttons = new javax.swing.JPanel();
+        deleteButton = new javax.swing.JButton();
         newButton = new javax.swing.JButton();
         loadButton = new javax.swing.JButton();
         saveButton = new javax.swing.JButton();
@@ -137,6 +161,14 @@ public class DbTab extends javax.swing.JPanel {
 
         bot.setLayout(new java.awt.BorderLayout());
         bot.add(metawidget, java.awt.BorderLayout.PAGE_START);
+
+        deleteButton.setText("Delete");
+        deleteButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                deleteButtonActionPerformed(evt);
+            }
+        });
+        buttons.add(deleteButton);
 
         newButton.setText("New");
         newButton.addActionListener(new java.awt.event.ActionListener() {
@@ -184,23 +216,35 @@ public class DbTab extends javax.swing.JPanel {
     }//GEN-LAST:event_loadButtonActionPerformed
 
     private void load() {
-        new SwingWorker<List, Boolean>() {
+        new SwingWorker<List, RuntimeException>() {
             @Override
             protected List doInBackground() throws Exception {
-                return service.findAll();
+                try {
+                    return service.findAll();
+                } catch (RuntimeException e) {
+                    publish(e);
+                    return null;
+                }
             }
 
             @Override
             protected void done() {
                 try {
-                    tableModel = new BeanTableModel(clazz, get());
-                    tableModel.sortColumnNames();
-                    jTable.setModel(tableModel);
-
+                    if (get() != null) {
+                        tableModel = new BeanTableModel(clazz, get());
+                        tableModel.sortColumnNames();
+                        jTable.setModel(tableModel);
+                    }
                 } catch (InterruptedException | ExecutionException ex) {
                     Logger.getLogger(DbTab.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
+
+            @Override
+            protected void process(List<RuntimeException> chunks) {
+                showException("Chyba", chunks.get(0));
+            }
+
         }.execute();
     }
 
@@ -208,43 +252,123 @@ public class DbTab extends javax.swing.JPanel {
         try {
             metawidget.setToInspect(clazz.newInstance());
             jTable.clearSelection();
+            oldObj = null;
         } catch (InstantiationException | IllegalAccessException ex) {
             Logger.getLogger(DbTab.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_newButtonActionPerformed
 
+    private void deleteButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteButtonActionPerformed
+        if (service != null) {
+            if (jTable.getSelectedRow() > -1) {
+                delete();
+            }
+        }
+    }//GEN-LAST:event_deleteButtonActionPerformed
+
     private void create() {
-        new SwingWorker<Boolean, Boolean>() {
+        new SwingWorker<Boolean, RuntimeException>() {
             @Override
             protected Boolean doInBackground() throws Exception {
-                service.create(metawidget.getToInspect());
-                return true;
+                try {
+                    service.create(metawidget.getToInspect());
+                    return true;
+                } catch (RuntimeException e) {
+                    publish(e);
+                }
+                return false;
             }
 
             @Override
             protected void done() {
-                // a co teraz?
+                try {
+                    if (get()) {
+                        load();
+                    }
+                } catch (InterruptedException | ExecutionException ex) {
+                    Logger.getLogger(DbTab.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+
+            @Override
+            protected void process(List<RuntimeException> chunks) {
+                showException("Chyba", chunks.get(0));
             }
         }.execute();
     }
 
     private void update() {
-        new SwingWorker<Boolean, Boolean>() {
+        new SwingWorker<Boolean, RuntimeException>() {
             @Override
             protected Boolean doInBackground() throws Exception {
-                service.update(metawidget.getToInspect());
-                return true;
+                try {
+                    service.update(oldObj, metawidget.getToInspect());
+                    return true;
+                } catch (RuntimeException e) {
+                    publish(e);
+                }
+                return false;
             }
 
             @Override
             protected void done() {
-                ((AbstractTableModel) tableModel).fireTableRowsUpdated(jTable.getSelectedRow(), jTable.getSelectedRow());
+                try {
+                    if (get()) {
+                        tableModel.fireTableRowsUpdated(jTable.getSelectedRow(), jTable.getSelectedRow());
+                    }
+                } catch (InterruptedException | ExecutionException ex) {
+                    Logger.getLogger(DbTab.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+            }
+
+            @Override
+            protected void process(List<RuntimeException> chunks) {
+                showException("Chyba", chunks.get(0));
             }
         }.execute();
+    }
+
+    private void delete() {
+        new SwingWorker<Boolean, RuntimeException>() {
+            @Override
+            protected Boolean doInBackground() throws Exception {
+                try {
+                    service.delete(metawidget.getToInspect());
+                    return true;
+                } catch (RuntimeException e) {
+                    publish(e);
+                }
+                return false;
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    if (get()) {
+                        load();
+                        newButtonActionPerformed(null);
+                    }
+                } catch (InterruptedException | ExecutionException ex) {
+                    Logger.getLogger(DbTab.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+            }
+
+            @Override
+            protected void process(List<RuntimeException> chunks) {
+                showException("Chyba", chunks.get(0));
+            }
+        }.execute();
+    }
+
+    private void showException(String message, Exception e) {
+        JOptionPane.showMessageDialog(null, e.getMessage(), message, JOptionPane.ERROR_MESSAGE);
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel bot;
     private javax.swing.JPanel buttons;
+    private javax.swing.JButton deleteButton;
     private javax.swing.JTable jTable;
     private javax.swing.JButton loadButton;
     private org.metawidget.swing.SwingMetawidget metawidget;

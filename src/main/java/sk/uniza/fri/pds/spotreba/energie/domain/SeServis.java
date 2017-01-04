@@ -18,7 +18,7 @@ public class SeServis implements Serializable {
 
         private static final long serialVersionUID = 2L;
         private String popis;
-        private char typ_servisu;
+        private Character typ_servisu;
         private int spotreba;
 
         public String getPopis() {
@@ -29,11 +29,11 @@ public class SeServis implements Serializable {
             this.popis = popis;
         }
 
-        public char getTyp_servisu() {
+        public Character getTyp_servisu() {
             return typ_servisu;
         }
 
-        public void setTyp_servisu(char typ_servisu) {
+        public void setTyp_servisu(Character typ_servisu) {
             this.typ_servisu = typ_servisu;
         }
 
@@ -43,6 +43,11 @@ public class SeServis implements Serializable {
 
         public void setSpotreba(int spotreba) {
             this.spotreba = spotreba;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("Popis: %s %nTyp: %s %nSpotreba: %d", popis, typ_servisu, spotreba);
         }
 
     }

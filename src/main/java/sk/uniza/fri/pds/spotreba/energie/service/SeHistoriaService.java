@@ -5,7 +5,13 @@
  */
 package sk.uniza.fri.pds.spotreba.energie.service;
 
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.LinkedList;
 import java.util.List;
+import sk.uniza.fri.pds.spotreba.energie.OracleJDBCConnector;
 import sk.uniza.fri.pds.spotreba.energie.domain.SeHistoria;
 
 public class SeHistoriaService implements SeService<SeHistoria> {
@@ -18,23 +24,45 @@ public class SeHistoriaService implements SeService<SeHistoria> {
 
     @Override
     public void create(SeHistoria object) {
-        System.out.println("");
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("BEGIN INSERT_SE_HISTORIA(?, ?, ?); END;");
+            stmnt.setInt(1, object.getCisloOdberatela());
+            stmnt.setInt(2, object.getCisZariadenia());
+            stmnt.setDate(3, Utils.utilDateToSqlDate(object.getDatumInstalacie()));
+            stmnt.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public List<SeHistoria> findAll() {
-
-        return null;
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("SELECT * FROM SE_HISTORIA ORDER BY CISLO_ODBERATELA ASC, CIS_ZARIADENIA");
+            ResultSet result = stmnt.executeQuery();
+            List<SeHistoria> output = new LinkedList<>();
+            while (result.next()) {
+                SeHistoria o = new SeHistoria();
+                o.setCisZariadenia(result.getInt("CIS_ZARIADENIA"));
+                o.setCisloOdberatela(result.getInt("CISLO_ODBERATELA"));
+                o.setDatumInstalacie(result.getDate("DATUM_INSTALACIE"));
+                o.setDatumOdobratia(result.getDate("DATUM_ODOBRATIA"));
+                output.add(o);
+            }
+            return output;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
-    public void update(SeHistoria object) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void update(SeHistoria old, SeHistoria object) {
+        throw new RuntimeException("Pre túto tabuľku bola táto funkcionalita zablokovaná!");
     }
 
     @Override
     public void delete(SeHistoria object) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new RuntimeException("Pre túto tabuľku bola táto funkcionalita zablokovaná!");
     }
 
     public static synchronized SeHistoriaService getInstance() {
