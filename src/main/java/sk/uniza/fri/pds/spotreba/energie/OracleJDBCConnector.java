@@ -25,7 +25,7 @@ public class OracleJDBCConnector {
             Connection connection = DriverManager.getConnection(
                     "jdbc:oracle:thin:@localhost:1521:xe", "patrik",
                     "prestigio1");
-            System.out.println("You made it, take control your database now!");
+            System.out.println("You madee it, take control your database now!");
             return connection;
 
         } catch (SQLException e) {
