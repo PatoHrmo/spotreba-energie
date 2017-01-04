@@ -63,7 +63,7 @@ public class SeOdpisService implements SeService<SeOdpis> {
 
     @Override
     public void delete(SeOdpis object) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new RuntimeException("Pre túto tabuľku bola táto funkcionalita zablokovaná!");
     }
 
     public static synchronized SeOdpisService getInstance() {

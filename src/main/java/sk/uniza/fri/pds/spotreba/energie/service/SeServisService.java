@@ -71,7 +71,7 @@ public class SeServisService implements SeService<SeServis> {
 
     @Override
     public void delete(SeServis object) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new RuntimeException("Pre túto tabuľku bola táto funkcionalita zablokovaná!");
     }
 
     public static synchronized SeServisService getInstance() {
