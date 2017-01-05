@@ -1,0 +1,49 @@
+-- PRED COMPILOVANIM NAJPRV KOMPILUJ  POMOCNE_TYPY.SQL
+
+------------------nazorna ukazka pouzitia- po kompilacii spusti toto
+--select * from table(get_statistika_servisy());
+create or replace function get_statistika_servisy
+return zaznamy_info_poruchovost_t
+as 
+pocet_servisov_do_5_rokov INTEGER;
+pocet_servisov_typu_0 integer;
+pocet_servisov_typu_1 integer;
+pocet_servisov_typu_2 integer;
+zaznamy zaznamy_info_poruchovost_t;
+prva_instalacia date;
+meno_odb varchar(40);
+begin
+  zaznamy := zaznamy_info_poruchovost_t();
+  for zariadenia in (select * from SE_ZARIADENIE where cis_zariadenia<1000) loop
+      select min(datum_instalacie) into prva_instalacia from SE_HISTORIA
+      where cis_zariadenia = zariadenia.cis_zariadenia;
+      
+      select count(*) into pocet_servisov_do_5_rokov from SE_SERVIS 
+      where datum_servisu<ADD_MONTHS(prva_instalacia,12*5)
+      and cis_zariadenia = zariadenia.cis_zariadenia;
+      
+      select count(*) into pocet_servisov_typu_2 from SE_HISTORIA 
+      where cis_zariadenia = zariadenia.cis_zariadenia
+      and datum_odobratia is not null
+      and datum_odobratia<ADD_MONTHS(prva_instalacia,12*5);
+      
+      pocet_servisov_do_5_rokov:=pocet_servisov_do_5_rokov+pocet_servisov_typu_2;
+      
+      select count(*) into pocet_servisov_typu_0 from SE_SERVIS se
+      where cis_zariadenia = zariadenia.cis_zariadenia
+      and se.info_servisu.typ_servisu = '0';
+      
+      select count(*) into pocet_servisov_typu_1 from SE_SERVIS se
+      where cis_zariadenia = zariadenia.cis_zariadenia
+      and se.info_servisu.typ_servisu = '1';
+      
+      select count(*) into pocet_servisov_typu_2 from SE_SERVIS se
+      where cis_zariadenia = zariadenia.cis_zariadenia
+      and se.info_servisu.typ_servisu = '2';
+      
+      zaznamy.extend;
+      zaznamy(zaznamy.last) := info_poruchovost_t(zariadenia.cis_zariadenia,pocet_servisov_do_5_rokov,pocet_servisov_typu_0,
+                                                  pocet_servisov_typu_1,pocet_servisov_typu_2);
+  end loop;
+  return zaznamy;
+end get_statistika_servisy;
