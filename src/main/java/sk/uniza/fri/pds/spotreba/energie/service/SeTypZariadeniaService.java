@@ -13,6 +13,7 @@ import java.util.LinkedList;
 import java.util.List;
 import sk.uniza.fri.pds.spotreba.energie.OracleJDBCConnector;
 import sk.uniza.fri.pds.spotreba.energie.domain.SeTypZariadenia;
+import sk.uniza.fri.pds.spotreba.energie.domain.util.MeraciaVelicina;
 
 public class SeTypZariadeniaService implements SeService<SeTypZariadenia> {
 
@@ -26,7 +27,7 @@ public class SeTypZariadeniaService implements SeService<SeTypZariadenia> {
     public void create(SeTypZariadenia object) {
         try (Connection connection = OracleJDBCConnector.getConnection();) {
             CallableStatement stmnt = connection.prepareCall("BEGIN INSERT_SE_TYP_ZARIADENIA(?, ?, ?); END;");
-            stmnt.setString(1, object.getMeraciaVelicina());
+            stmnt.setString(1, object.getMeraciaVelicina().name().toLowerCase());
             stmnt.setInt(2, object.getCisloModelu());
             stmnt.setString(3, object.getVyrobca());
             stmnt.execute();
@@ -44,7 +45,7 @@ public class SeTypZariadeniaService implements SeService<SeTypZariadenia> {
             while (result.next()) {
                 SeTypZariadenia o = new SeTypZariadenia();
                 o.setTyp(result.getInt("TYP"));
-                o.setMeraciaVelicina(result.getString("MERACIA_VELICINA"));
+                o.setMeraciaVelicina(MeraciaVelicina.valueOf(result.getString("MERACIA_VELICINA").toUpperCase()));
                 o.setCisloModelu(result.getInt("CISLO_MODELU"));
                 o.setVyrobca(result.getString("VYROBCA"));
                 output.add(o);

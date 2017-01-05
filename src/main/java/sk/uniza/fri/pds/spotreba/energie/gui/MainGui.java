@@ -5,6 +5,27 @@
  */
 package sk.uniza.fri.pds.spotreba.energie.gui;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.List;
+import javax.swing.JOptionPane;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.DateAxis;
+import org.jfree.chart.axis.DateTickUnit;
+import org.jfree.chart.axis.DateTickUnitType;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.data.time.Month;
+import org.jfree.data.time.TimeSeries;
+import org.jfree.data.time.TimeSeriesCollection;
+import org.jfree.data.xy.IntervalXYDataset;
+import org.metawidget.swing.SwingMetawidget;
+import sk.uniza.fri.pds.spotreba.energie.domain.KrokSpotreby;
+import sk.uniza.fri.pds.spotreba.energie.service.SeHistoriaService;
+import sk.uniza.fri.pds.spotreba.energie.service.util.SpendingStatisticsParameters;
+
 /**
  *
  * @author Coder
@@ -33,8 +54,8 @@ public class MainGui extends javax.swing.JFrame {
 
         tabs = new javax.swing.JTabbedPane();
         menuBar = new javax.swing.JMenuBar();
-        jMenu1 = new javax.swing.JMenu();
-        jMenu2 = new javax.swing.JMenu();
+        statisticsMenu = new javax.swing.JMenu();
+        showSpendingStatistics = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -42,16 +63,64 @@ public class MainGui extends javax.swing.JFrame {
         tabs.setPreferredSize(new java.awt.Dimension(600, 900));
         getContentPane().add(tabs, java.awt.BorderLayout.CENTER);
 
-        jMenu1.setText("File");
-        menuBar.add(jMenu1);
+        statisticsMenu.setText("Štatistiky");
 
-        jMenu2.setText("Edit");
-        menuBar.add(jMenu2);
+        showSpendingStatistics.setText("Vývoj spotreby");
+        showSpendingStatistics.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                showSpendingStatisticsActionPerformed(evt);
+            }
+        });
+        statisticsMenu.add(showSpendingStatistics);
+
+        menuBar.add(statisticsMenu);
 
         setJMenuBar(menuBar);
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void showSpendingStatisticsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showSpendingStatisticsActionPerformed
+        SwingMetawidget metawidget = new SwingMetawidget();
+        MetawidgetUtils.setCommonSettings(metawidget);
+        final SpendingStatisticsParameters params = new SpendingStatisticsParameters();
+        metawidget.setToInspect(params);
+        Object[] message = {
+            metawidget
+        };
+
+        int option = JOptionPane.showConfirmDialog(null, message, "Vývoj spotreby", JOptionPane.OK_CANCEL_OPTION);
+        if (option == JOptionPane.OK_OPTION) {
+            List<KrokSpotreby> spendingStatistics = SeHistoriaService.getInstance().getSpendingStatistics(params);
+            final TimeSeries series = new TimeSeries("");
+
+            final String title = "Vývoj spotreby";
+            for (KrokSpotreby krok : spendingStatistics) {
+                series.add(new Month(krok.getDatumOd()), krok.getSpotreba());
+            }
+            final IntervalXYDataset dataset = (IntervalXYDataset) new TimeSeriesCollection(series);
+            JFreeChart chart = ChartFactory.createXYBarChart(
+                    title, // title
+                    "", // x-axis label
+                    true, // date axis?
+                    "", // y-axis label
+                    dataset, // data
+                    PlotOrientation.VERTICAL, // orientation
+                    false, // create legend?
+                    true, // generate tooltips?
+                    false // generate URLs?
+            );
+
+            // Set date axis style
+            DateAxis axis = (DateAxis) ((XYPlot) chart.getPlot()).getDomainAxis();
+            axis.setDateFormatOverride(new SimpleDateFormat("yyyy"));
+            DateFormat formatter = new SimpleDateFormat("yyyy");
+            DateTickUnit unit = new DateTickUnit(DateTickUnitType.YEAR, 1, formatter);
+            axis.setTickUnit(unit);
+
+            JOptionPane.showMessageDialog(null, new ChartPanel(chart));
+        }
+    }//GEN-LAST:event_showSpendingStatisticsActionPerformed
 
     /**
      * @param args the command line arguments
@@ -89,9 +158,9 @@ public class MainGui extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JMenu jMenu1;
-    private javax.swing.JMenu jMenu2;
     private javax.swing.JMenuBar menuBar;
+    private javax.swing.JMenuItem showSpendingStatistics;
+    private javax.swing.JMenu statisticsMenu;
     private javax.swing.JTabbedPane tabs;
     // End of variables declaration//GEN-END:variables
 }
