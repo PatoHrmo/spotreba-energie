@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JComboBox;
 import static org.metawidget.inspector.InspectionResultConstants.*;
 import org.metawidget.swing.SwingMetawidget;
 import org.metawidget.widgetbuilder.iface.WidgetBuilder;
@@ -56,6 +57,34 @@ public class WidgetBuilders {
                 } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
                     Logger.getLogger(WidgetBuilders.class.getName()).log(Level.SEVERE, null, ex);
                 }
+            }
+            return null;
+        }
+
+    }
+
+    public static class EnumWidgetBuilder implements WidgetBuilder<Component, SwingMetawidget> {
+
+        @Override
+        public Component buildWidget(String elementName, Map<String, String> attributes, SwingMetawidget metawidget) {
+            try {
+                final Class clazz = Class.forName(attributes.get(TYPE));
+                if (clazz.isEnum()) {
+                    try {
+                        Object obj = metawidget.getToInspect();
+                        Method method = findGeter(obj, attributes.get(NAME));
+                        method.invoke(obj);
+                        Method valuesMethod = clazz.getMethod("values");
+                        Object[] values = (Object[]) valuesMethod.invoke(null);
+                        JComboBox box = new JComboBox<>(values);
+                        return box;
+                    } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+                        Logger.getLogger(WidgetBuilders.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+
+            } catch (ClassNotFoundException ex) {
+
             }
             return null;
         }

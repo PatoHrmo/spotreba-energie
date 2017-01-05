@@ -12,7 +12,9 @@ import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 import sk.uniza.fri.pds.spotreba.energie.OracleJDBCConnector;
+import sk.uniza.fri.pds.spotreba.energie.domain.KrokSpotreby;
 import sk.uniza.fri.pds.spotreba.energie.domain.SeHistoria;
+import sk.uniza.fri.pds.spotreba.energie.service.util.SpendingStatisticsParameters;
 
 public class SeHistoriaService implements SeService<SeHistoria> {
 
@@ -74,6 +76,30 @@ public class SeHistoriaService implements SeService<SeHistoria> {
     @Override
     public void delete(SeHistoria object) {
         throw new RuntimeException("Pre túto tabuľku bola táto funkcionalita zablokovaná!");
+    }
+
+    public List<KrokSpotreby> getSpendingStatistics(SpendingStatisticsParameters params) {
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("SELECT * FROM TABLE(get_statistika_spotreby(?,?,?,?,?))");
+            stmnt.setInt(1, params.getIdSpotrebitela());
+            stmnt.setDate(2, Utils.utilDateToSqlDate(params.getDatumOd()));
+            stmnt.setDate(3, Utils.utilDateToSqlDate(params.getDatumDo()));
+            stmnt.setInt(4, params.getGranularita().val);
+            stmnt.setString(5, params.getVelicina().name().toLowerCase());
+            System.out.println(stmnt);
+            ResultSet result = stmnt.executeQuery();
+            List<KrokSpotreby> output = new LinkedList<>();
+            while (result.next()) {
+                KrokSpotreby o = new KrokSpotreby();
+                o.setDatumOd(result.getDate("DATUM_OD"));
+                o.setDatumDo(result.getDate("DATUM_DO"));
+                o.setSpotreba(result.getDouble("SPOTREBA"));
+                output.add(o);
+            }
+            return output;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static synchronized SeHistoriaService getInstance() {
