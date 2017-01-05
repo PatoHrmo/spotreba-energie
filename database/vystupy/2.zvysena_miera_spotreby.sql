@@ -19,14 +19,14 @@ begin
           select min(datum_instalacie) into prvy_odpis from SE_HISTORIA
           where cislo_odberatela = odberatel.cislo_odberatela
           and get_typ_veliciny_zariadenia(cis_zariadenia) = velicina.meracia_velicina;
-          IF get_spotreba_za_obdobie(odberatel.cislo_odberatela,datum_od,datum_do,velicina.meracia_velicina) > 
-             get_spotreba_za_obdobie(odberatel.cislo_odberatela,prvy_odpis,datum_od,velicina.meracia_velicina)*1.2 
+          IF get_spotreba_za_obdobie(odberatel.cislo_odberatela,datum_od,datum_do,velicina.meracia_velicina)/(datum_do-datum_od) > 
+             (get_spotreba_za_obdobie(odberatel.cislo_odberatela,prvy_odpis,datum_od,velicina.meracia_velicina)/(datum_od-prvy_odpis))*1.2
           THEN
              select meno||' '||priezvisko into meno_odb from SE_OSOBA where rod_cislo = odberatel.rod_cislo;
              zaznamy.extend;
              zaznamy(zaznamy.last):= zvysena_spotreba_t(meno_odb,velicina.meracia_velicina, 
-                                     get_spotreba_za_obdobie(odberatel.cislo_odberatela,prvy_odpis,datum_od,velicina.meracia_velicina),
-                                     get_spotreba_za_obdobie(odberatel.cislo_odberatela,datum_od,datum_do,velicina.meracia_velicina));
+                                     get_spotreba_za_obdobie(odberatel.cislo_odberatela,prvy_odpis,datum_od,velicina.meracia_velicina)/(datum_od-prvy_odpis),
+                                     get_spotreba_za_obdobie(odberatel.cislo_odberatela,datum_od,datum_do,velicina.meracia_velicina)/(datum_do-datum_od));
              
           END IF;
       end loop;

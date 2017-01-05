@@ -35,3 +35,17 @@ create or replace type info_poruchovost_t is object (
 /
 create or replace type zaznamy_info_poruchovost_t is table of info_poruchovost_t;
 /
+
+-- pomocky pre 4. vystup
+create or replace type zaznam_spotreba_energie_t is object (
+    typ_odberatela CHAR(1),
+    kategoria CHAR(1),
+    min_spotreba number,
+    mesiac_min_spotreby integer,
+    max_spotreba number,
+    mesiac_max_spotreby integer,
+    priemer number
+);
+/
+create or replace type zaznamy_spotreby_energie_t is table of zaznam_spotreba_energie_t;
+/
