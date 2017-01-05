@@ -1,11 +1,9 @@
-create or replace type zaznam_o_spotrebe_t is object(
-  datum_od date,
-  datum_do date,
-  spotreba number
-);
-/
-create or replace type zaznamy_o_spotrebe_t is table of zaznam_o_spotrebe_t;
-/
+-- PRED COMPILOVANIM NAJPRV KOMPILUJ GET_SPOTREBA_ZA_OBDOBIE.SQL
+--                                   POMOCNE_TYPY.SQL
+
+------------------nazorna ukazka pouzitia- po kompilacii spusti toto
+--select * from table(get_statistika_spotreby(0,to_date('10.10.2010','dd.mm.yyyy'),to_date('10.10.2013','dd.mm.yyyy'),0,'voda'));
+-- granuralita symbolizuje velkost kroku pri statistike(0- mesiac; 1-polrok; ostatne symbolizuju cisla rok)
 create or replace function get_statistika_spotreby(
     pa_cislo_odberatela SE_ODBERATEL.cislo_odberatela%TYPE,
     datum_od date,
