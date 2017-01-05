@@ -25,10 +25,11 @@ public class SeHistoriaService implements SeService<SeHistoria> {
     @Override
     public void create(SeHistoria object) {
         try (Connection connection = OracleJDBCConnector.getConnection();) {
-            CallableStatement stmnt = connection.prepareCall("BEGIN INSERT_SE_HISTORIA(?, ?, ?); END;");
+            CallableStatement stmnt = connection.prepareCall("BEGIN INSERT_SE_HISTORIA(?, ?, ?,?); END;");
             stmnt.setInt(1, object.getCisloOdberatela());
             stmnt.setInt(2, object.getCisZariadenia());
             stmnt.setDate(3, Utils.utilDateToSqlDate(object.getDatumInstalacie()));
+            stmnt.setInt(4, object.getZamestnanecVykonvajuciZmenu());
             stmnt.execute();
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -57,7 +58,17 @@ public class SeHistoriaService implements SeService<SeHistoria> {
 
     @Override
     public void update(SeHistoria old, SeHistoria object) {
-        throw new RuntimeException("Pre túto tabuľku bola táto funkcionalita zablokovaná!");
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("BEGIN ODOBER_ZARIADENIE(?, ?, ?, ?, ?); END;");
+            stmnt.setInt(1, old.getCisloOdberatela());
+            stmnt.setInt(2, old.getCisZariadenia());
+            stmnt.setDate(3, Utils.utilDateToSqlDate(object.getDatumOdobratia()));
+            stmnt.setInt(4, object.getZamestnanecVykonvajuciZmenu());
+            stmnt.setInt(5, object.getSpotrebaPredOdobratim());
+            stmnt.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
