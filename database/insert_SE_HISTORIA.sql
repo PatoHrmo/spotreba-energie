@@ -69,8 +69,8 @@ BEGIN
   SET spotreba = 0
   where CIS_ZARIADENIA = nove_cislo_zariadenia;
   INSERT INTO SE_HISTORIA VALUES (nove_cislo_odberatela, nove_cislo_zariadenia, novy_datum_instalacie, null);
-  
-  
+  insert_SE_ODPIS(novy_datum_instalacie,nove_cislo_zariadenia,id_instalujuceho_zamestnanca,0);
+  COMMIT;
   EXCEPTION
     WHEN zariadenie_sa_pouziva THEN
         RAISE_APPLICATION_ERROR(-20001,'zariadenie sa pouziva');
@@ -80,7 +80,7 @@ BEGIN
         RAISE_APPLICATION_ERROR(-20003,'odberatel uz ma pristroj na meranie tejto veliciny');
     WHEN zly_region_zamestnanca THEN
         RAISE_APPLICATION_ERROR(-20004,'odberatel je z ineho regionu ako zamestnanec');
-  COMMIT;
+  
 
 END;
 /
