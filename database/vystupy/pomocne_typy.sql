@@ -49,3 +49,10 @@ create or replace type zaznam_spotreba_energie_t is object (
 /
 create or replace type zaznamy_spotreby_energie_t is table of zaznam_spotreba_energie_t;
 /
+
+create or replace type naj_spotreba_t is object (
+  mesiac_najvecsia_spotreba date,
+  najvacsia_spotreba number,
+  mesiac_najmensia_spotreba date,
+  najmensia_spotreba number
+);
