@@ -1,5 +1,7 @@
 package sk.uniza.fri.pds.spotreba.energie.gui;
 
+import sk.uniza.fri.pds.spotreba.energie.gui.utils.TableHidden;
+import sk.uniza.fri.pds.spotreba.energie.gui.utils.DisplayPriority;
 import java.lang.reflect.*;
 import java.util.*;
 

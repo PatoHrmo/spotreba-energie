@@ -14,7 +14,12 @@ import java.util.List;
 import sk.uniza.fri.pds.spotreba.energie.OracleJDBCConnector;
 import sk.uniza.fri.pds.spotreba.energie.domain.KrokSpotreby;
 import sk.uniza.fri.pds.spotreba.energie.domain.SeHistoria;
+import sk.uniza.fri.pds.spotreba.energie.domain.StatistikaTypuKategorie;
+import sk.uniza.fri.pds.spotreba.energie.domain.ZvysenieSpotreby;
+import sk.uniza.fri.pds.spotreba.energie.domain.util.MeraciaVelicina;
+import sk.uniza.fri.pds.spotreba.energie.service.util.IncreasedSpendingStatisticParams;
 import sk.uniza.fri.pds.spotreba.energie.service.util.SpendingStatisticsParameters;
+import sk.uniza.fri.pds.spotreba.energie.service.util.StatistikaTypuKategorieParams;
 
 public class SeHistoriaService implements SeService<SeHistoria> {
 
@@ -86,7 +91,6 @@ public class SeHistoriaService implements SeService<SeHistoria> {
             stmnt.setDate(3, Utils.utilDateToSqlDate(params.getDatumDo()));
             stmnt.setInt(4, params.getGranularita().val);
             stmnt.setString(5, params.getVelicina().name().toLowerCase());
-            System.out.println(stmnt);
             ResultSet result = stmnt.executeQuery();
             List<KrokSpotreby> output = new LinkedList<>();
             while (result.next()) {
@@ -94,6 +98,51 @@ public class SeHistoriaService implements SeService<SeHistoria> {
                 o.setDatumOd(result.getDate("DATUM_OD"));
                 o.setDatumDo(result.getDate("DATUM_DO"));
                 o.setSpotreba(result.getDouble("SPOTREBA"));
+                output.add(o);
+            }
+            return output;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<ZvysenieSpotreby> getIncreasedSpendingStatistics(IncreasedSpendingStatisticParams params) {
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("SELECT * FROM TABLE(get_zvysena_miera_spotreby(?,?))");
+            stmnt.setDate(1, Utils.utilDateToSqlDate(params.getDatumOd()));
+            stmnt.setDate(2, Utils.utilDateToSqlDate(params.getDatumDo()));
+            ResultSet result = stmnt.executeQuery();
+            List<ZvysenieSpotreby> output = new LinkedList<>();
+            while (result.next()) {
+                ZvysenieSpotreby o = new ZvysenieSpotreby();
+                o.setMeno(result.getString("MENO"));
+                o.setPriemernaSpotrebaVMinulosti(result.getDouble("PRIEMERNA_SPOTREBA_V_MINULOSTI"));
+                o.setVelicina(MeraciaVelicina.valueOf(result.getString("VELICINA").toUpperCase()));
+                o.setZvysenaSpotreba(result.getDouble("ZVYSENA_SPOTREBA"));
+                output.add(o);
+            }
+            return output;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<StatistikaTypuKategorie> getTypeAndCategoryStatistics(StatistikaTypuKategorieParams params) {
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("SELECT * FROM TABLE(get_statistika_typ_a_kategoria(?,?))");
+            stmnt.setInt(1, params.getRok());
+            stmnt.setString(2, params.getVelicina().name().toLowerCase());
+            ResultSet result = stmnt.executeQuery();
+            List<StatistikaTypuKategorie> output = new LinkedList<>();
+            while (result.next()) {
+                StatistikaTypuKategorie o = new StatistikaTypuKategorie();
+                o.setTyp(result.getString("TYP_ODBERATELA"));
+                o.setKategoria(result.getString("KATEGORIA"));
+                o.setMinimalnaSpotreba(result.getDouble("MIN_SPOTREBA"));
+                o.setMesiacMinimalnejSpotreby(result.getInt("MESIAC_MIN_SPOTREBY"));
+                o.setMaximalnaSpotreba(result.getDouble("MAX_SPOTREBA"));
+                o.setMesiacMaximalnejSpotreby(result.getInt("MESIAC_MAX_SPOTREBY"));
+                o.setPriemernaSpotreba(result.getDouble("PRIEMER"));
                 output.add(o);
             }
             return output;
