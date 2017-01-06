@@ -15,6 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 import sk.uniza.fri.pds.spotreba.energie.OracleJDBCConnector;
 import sk.uniza.fri.pds.spotreba.energie.domain.SeServis;
+import sk.uniza.fri.pds.spotreba.energie.domain.StatistikaServisov;
 
 public class SeServisService implements SeService<SeServis> {
 
@@ -82,6 +83,26 @@ public class SeServisService implements SeService<SeServis> {
     @Override
     public void delete(SeServis object) {
         throw new RuntimeException("Pre túto tabuľku bola táto funkcionalita zablokovaná!");
+    }
+
+    public List<StatistikaServisov> getServiceStatistics() {
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("SELECT * FROM TABLE(get_statistika_servisy())");
+            ResultSet result = stmnt.executeQuery();
+            List<StatistikaServisov> output = new LinkedList<>();
+            while (result.next()) {
+                StatistikaServisov o = new StatistikaServisov();
+                o.setCisloZariadenia(result.getInt("CISLO_ZARIADENIA"));
+                o.setPocetServisovDo5Rokov(result.getInt("POCET_SERVISOV_DO_5_ROKOV"));
+                o.setPocetServisovTypu0(result.getInt("POCET_SERVISOV_TYPU_0"));
+                o.setPocetServisovTypu1(result.getInt("POCET_SERVISOV_TYPU_1"));
+                o.setPocetServisovTypu2(result.getInt("POCET_SERVISOV_TYPU_2"));
+                output.add(o);
+            }
+            return output;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static synchronized SeServisService getInstance() {

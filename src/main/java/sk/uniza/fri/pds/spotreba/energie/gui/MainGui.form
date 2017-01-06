@@ -4,9 +4,9 @@
   <NonVisualComponents>
     <Menu class="javax.swing.JMenuBar" name="menuBar">
       <SubComponents>
-        <Menu class="javax.swing.JMenu" name="statisticsMenu">
+        <Menu class="javax.swing.JMenu" name="spendingMenu">
           <Properties>
-            <Property name="text" type="java.lang.String" value="&#x160;tatistiky"/>
+            <Property name="text" type="java.lang.String" value="Spotreba"/>
           </Properties>
           <SubComponents>
             <MenuItem class="javax.swing.JMenuItem" name="showSpendingStatistics">
@@ -23,6 +23,21 @@
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="increasedSpendingActionPerformed"/>
+              </Events>
+            </MenuItem>
+          </SubComponents>
+        </Menu>
+        <Menu class="javax.swing.JMenu" name="servisMenu">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Servisy"/>
+          </Properties>
+          <SubComponents>
+            <MenuItem class="javax.swing.JMenuItem" name="servisStatsMenuItem">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="&#x160;tatistika"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="servisStatsMenuItemActionPerformed"/>
               </Events>
             </MenuItem>
           </SubComponents>
