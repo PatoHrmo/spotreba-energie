@@ -109,7 +109,12 @@ public class MainGui extends javax.swing.JFrame {
         });
         spendingMenu.add(jMenuItem1);
 
-        jMenuItem2.setText("Spotreba b poslednom roku menšia ako 10% priemeru");
+        jMenuItem2.setText("Spotreba v poslednom roku menšia ako 10% priemeru");
+        jMenuItem2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem2ActionPerformed(evt);
+            }
+        });
         spendingMenu.add(jMenuItem2);
 
         typeAndCatMenuItem.setText("Štatistika podľa typu a kategórie");
@@ -222,10 +227,14 @@ public class MainGui extends javax.swing.JFrame {
     }//GEN-LAST:event_typeAndCatMenuItemActionPerformed
 
     private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
-        showLastYearChange();
+        showLastYearChange(1.5);
     }//GEN-LAST:event_jMenuItem1ActionPerformed
 
-    private void showLastYearChange() throws HeadlessException {
+    private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
+        showLastYearChange(0.9);
+    }//GEN-LAST:event_jMenuItem2ActionPerformed
+
+    private void showLastYearChange(double factor) throws HeadlessException {
         final IncreasedSpendingStatisticParams params = new IncreasedSpendingStatisticParams();
         params.setDatumDo(new Date());
         Calendar cal = Calendar.getInstance();
@@ -233,9 +242,12 @@ public class MainGui extends javax.swing.JFrame {
         Date result = cal.getTime();
         params.setDatumOd(result);
 
-        List<ZvysenieSpotreby> spendingStatistics = SeHistoriaService.getInstance().getIncreasedSpendingStatistics(params, 1.5);
+        List<ZvysenieSpotreby> spendingStatistics = SeHistoriaService.getInstance().getIncreasedSpendingStatistics(params, factor);
 
         JScrollPane jScrollPane = new JScrollPane();
+        Dimension dimension = new Dimension(1200, 400);
+        jScrollPane.setSize(dimension);
+        jScrollPane.setPreferredSize(dimension);
         final BeanTableModel beanTableModel = new BeanTableModel(ZvysenieSpotreby.class, spendingStatistics);
         beanTableModel.sortColumnNames();
         JTable jTable = new JTable(beanTableModel);

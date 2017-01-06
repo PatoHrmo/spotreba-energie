@@ -1,9 +1,10 @@
 package sk.uniza.fri.pds.spotreba.energie.gui;
 
-import sk.uniza.fri.pds.spotreba.energie.gui.utils.TableHidden;
-import sk.uniza.fri.pds.spotreba.energie.gui.utils.DisplayPriority;
 import java.lang.reflect.*;
 import java.util.*;
+import sk.uniza.fri.pds.spotreba.energie.gui.utils.DisplayPriority;
+import sk.uniza.fri.pds.spotreba.energie.gui.utils.TableCollumnName;
+import sk.uniza.fri.pds.spotreba.energie.gui.utils.TableHidden;
 
 /**
  * The BeanTableModel will use reflection to determine the columns of data to be
@@ -165,6 +166,10 @@ public class BeanTableModel<T> extends RowTableModel<T> {
         //  by the table model methods.
         DisplayPriority dp = theMethod.getAnnotation(DisplayPriority.class);
         TableHidden hidden = theMethod.getAnnotation(TableHidden.class);
+        TableCollumnName colName = theMethod.getAnnotation(TableCollumnName.class);
+        if (colName != null) {
+            headerName = colName.name();
+        }
         if (hidden != null) {
             return;
         }
