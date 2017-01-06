@@ -30,6 +30,7 @@ import org.jfree.data.xy.IntervalXYDataset;
 import org.metawidget.swing.SwingMetawidget;
 import sk.uniza.fri.pds.spotreba.energie.domain.CelkovaStatistika;
 import sk.uniza.fri.pds.spotreba.energie.domain.KrokSpotreby;
+import sk.uniza.fri.pds.spotreba.energie.domain.SeZamestnanecInfo;
 import sk.uniza.fri.pds.spotreba.energie.domain.StatistikaServisov;
 import sk.uniza.fri.pds.spotreba.energie.domain.StatistikaTypuKategorie;
 import sk.uniza.fri.pds.spotreba.energie.domain.ZvysenieSpotreby;
@@ -38,11 +39,13 @@ import sk.uniza.fri.pds.spotreba.energie.gui.utils.MetawidgetUtils;
 import sk.uniza.fri.pds.spotreba.energie.service.NajminajucejsiSpotrebitel;
 import sk.uniza.fri.pds.spotreba.energie.service.SeHistoriaService;
 import sk.uniza.fri.pds.spotreba.energie.service.SeServisService;
+import sk.uniza.fri.pds.spotreba.energie.service.SeZamestnanecService;
 import sk.uniza.fri.pds.spotreba.energie.service.util.IncreasedSpendingStatisticParams;
 import sk.uniza.fri.pds.spotreba.energie.service.util.NajminajucejsiSpotrebiteliaParams;
 import sk.uniza.fri.pds.spotreba.energie.service.util.SpendingStatisticsParameters;
 import sk.uniza.fri.pds.spotreba.energie.service.util.StatistikaSpotriebParams;
 import sk.uniza.fri.pds.spotreba.energie.service.util.StatistikaTypuKategorieParams;
+import sk.uniza.fri.pds.spotreba.energie.service.util.ZamestnanecRegionParams;
 
 /**
  *
@@ -82,6 +85,8 @@ public class MainGui extends javax.swing.JFrame {
         jMenuItem3 = new javax.swing.JMenuItem();
         servisMenu = new javax.swing.JMenu();
         servisStatsMenuItem = new javax.swing.JMenuItem();
+        jMenu1 = new javax.swing.JMenu();
+        jMenuItem5 = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -160,6 +165,18 @@ public class MainGui extends javax.swing.JFrame {
         servisMenu.add(servisStatsMenuItem);
 
         menuBar.add(servisMenu);
+
+        jMenu1.setText("Zamestnanci");
+
+        jMenuItem5.setText("Zobraziť zamestnancov v regióne");
+        jMenuItem5.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem5ActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jMenuItem5);
+
+        menuBar.add(jMenu1);
 
         setJMenuBar(menuBar);
 
@@ -287,6 +304,20 @@ public class MainGui extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jMenuItem4ActionPerformed
 
+    private void jMenuItem5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem5ActionPerformed
+        final ZamestnanecRegionParams params = new ZamestnanecRegionParams();
+        int option = showUniversalInputDialog(params, "Zamestnanci v regióne");
+        if (option == JOptionPane.OK_OPTION) {
+            List<SeZamestnanecInfo> zams = SeZamestnanecService.getInstance().findInRegion(params);
+            JScrollPane jScrollPane = new JScrollPane();
+            final BeanTableModel beanTableModel = new BeanTableModel(SeZamestnanecInfo.class, zams);
+            beanTableModel.sortColumnNames();
+            JTable jTable = new JTable(beanTableModel);
+            jScrollPane.getViewport().add(jTable);
+            JOptionPane.showMessageDialog(null, jScrollPane);
+        }
+    }//GEN-LAST:event_jMenuItem5ActionPerformed
+
     private void showLastYearChange(double factor) throws HeadlessException {
         final IncreasedSpendingStatisticParams params = new IncreasedSpendingStatisticParams();
         params.setDatumDo(new Date());
@@ -356,10 +387,12 @@ public class MainGui extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem increasedSpending;
+    private javax.swing.JMenu jMenu1;
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JMenuItem jMenuItem2;
     private javax.swing.JMenuItem jMenuItem3;
     private javax.swing.JMenuItem jMenuItem4;
+    private javax.swing.JMenuItem jMenuItem5;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JMenu servisMenu;
     private javax.swing.JMenuItem servisStatsMenuItem;
