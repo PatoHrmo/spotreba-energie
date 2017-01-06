@@ -18,7 +18,7 @@ public class SeServis implements Serializable {
 
         private static final long serialVersionUID = 2L;
         private String popis;
-        private Character typ_servisu;
+        private TypServisu typ_servisu;
         private int spotreba;
 
         public String getPopis() {
@@ -29,11 +29,11 @@ public class SeServis implements Serializable {
             this.popis = popis;
         }
 
-        public Character getTyp_servisu() {
+        public TypServisu getTyp_servisu() {
             return typ_servisu;
         }
 
-        public void setTyp_servisu(Character typ_servisu) {
+        public void setTyp_servisu(TypServisu typ_servisu) {
             this.typ_servisu = typ_servisu;
         }
 
@@ -74,6 +74,27 @@ public class SeServis implements Serializable {
 
     public void setInfoServisu(InfoServisu infoServisu) {
         this.infoServisu = infoServisu;
+    }
+
+    public enum TypServisu {
+        DIAGNOSTIKA('0'), OPRAVA('1'), NASTAVENIE('2');
+
+        public final Character val;
+
+        private TypServisu(char val) {
+            this.val = val;
+        }
+
+        public static TypServisu getByValue(char val) {
+            if (val == '0') {
+                return DIAGNOSTIKA;
+            }
+            if (val == '1') {
+                return OPRAVA;
+            }
+            return NASTAVENIE;
+        }
+
     }
 
 }

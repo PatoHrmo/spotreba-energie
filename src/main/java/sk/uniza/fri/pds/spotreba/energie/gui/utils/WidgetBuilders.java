@@ -72,9 +72,6 @@ public class WidgetBuilders {
                 final Class clazz = Class.forName(attributes.get(TYPE));
                 if (clazz.isEnum()) {
                     try {
-                        Object obj = metawidget.getToInspect();
-                        Method method = findGeter(obj, attributes.get(NAME));
-                        method.invoke(obj);
                         Method valuesMethod = clazz.getMethod("values");
                         Object[] values = (Object[]) valuesMethod.invoke(null);
                         JComboBox box = new JComboBox<>(values);

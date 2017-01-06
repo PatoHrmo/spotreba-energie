@@ -2,6 +2,7 @@ package sk.uniza.fri.pds.spotreba.energie.domain;
 
 import sk.uniza.fri.pds.spotreba.energie.domain.util.MeraciaVelicina;
 import sk.uniza.fri.pds.spotreba.energie.gui.utils.DisplayPriority;
+import sk.uniza.fri.pds.spotreba.energie.gui.utils.TableCollumnName;
 
 public class ZvysenieSpotreby {
 
@@ -29,6 +30,7 @@ public class ZvysenieSpotreby {
     }
 
     @DisplayPriority(priority = 3)
+    @TableCollumnName(name = "Priemerná spotreba v minulosti (za deň)")
     public double getPriemernaSpotrebaVMinulosti() {
         return priemernaSpotrebaVMinulosti;
     }
@@ -37,6 +39,7 @@ public class ZvysenieSpotreby {
         this.priemernaSpotrebaVMinulosti = priemernaSpotrebaVMinulosti;
     }
 
+    @TableCollumnName(name = "Priemerná spotreba v sledovanom období (za deň)")
     public double getZvysenaSpotreba() {
         return zvysenaSpotreba;
     }
