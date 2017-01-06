@@ -46,9 +46,9 @@ public class SeOdberatelService implements SeService<SeOdberatel> {
                 SeOdberatel o = new SeOdberatel();
                 o.setCisloOdberatela(result.getInt("CISLO_ODBERATELA"));
                 o.setIco(result.getString("ICO"));
-                o.setKategoria(result.getString("KATEGORIA").charAt(0));
+                o.setKategoria(SeOdberatel.KategoriaOdberatela.valueOf(result.getString("KATEGORIA").toUpperCase()));
                 o.setRodCislo(result.getString("ROD_CISLO"));
-                o.setTyp(result.getString("TYP").charAt(0));
+                o.setTyp(SeOdberatel.TypOdberatela.getByValue(result.getString("TYP").charAt(0)));
                 output.add(o);
             }
             return output;

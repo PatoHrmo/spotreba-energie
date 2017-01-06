@@ -32,7 +32,7 @@ public class SeServisService implements SeService<SeServis> {
             stmnt.setDate(1, Utils.utilDateToSqlDate(object.getDatumServisu()));
             stmnt.setInt(2, object.getCisZariadenia());
             stmnt.setString(3, object.getInfoServisu().getPopis());
-            stmnt.setString(4, new Character(object.getInfoServisu().getTyp_servisu()).toString());
+            stmnt.setString(4, object.getInfoServisu().getTyp_servisu().val.toString());
             stmnt.setInt(5, object.getInfoServisu().getSpotreba());
             stmnt.execute();
         } catch (SQLException e) {
@@ -54,7 +54,7 @@ public class SeServisService implements SeService<SeServis> {
                 Object[] attributes = object.getAttributes();
                 SeServis.InfoServisu infoServisu = new SeServis.InfoServisu();
                 infoServisu.setPopis((String) attributes[0]);
-                infoServisu.setTyp_servisu(((String) attributes[1]).charAt(0));
+                infoServisu.setTyp_servisu((SeServis.TypServisu.getByValue(((String) attributes[1]).charAt(0))));
                 infoServisu.setSpotreba(((BigDecimal) attributes[2]).intValue());
                 o.setInfoServisu(infoServisu);
                 output.add(o);
