@@ -27,6 +27,8 @@ import org.jfree.data.xy.IntervalXYDataset;
 import org.metawidget.swing.SwingMetawidget;
 import sk.uniza.fri.pds.spotreba.energie.domain.KrokSpotreby;
 import sk.uniza.fri.pds.spotreba.energie.domain.ZvysenieSpotreby;
+import sk.uniza.fri.pds.spotreba.energie.gui.utils.DbClass;
+import sk.uniza.fri.pds.spotreba.energie.gui.utils.MetawidgetUtils;
 import sk.uniza.fri.pds.spotreba.energie.service.SeHistoriaService;
 import sk.uniza.fri.pds.spotreba.energie.service.util.IncreasedSpendingStatisticParams;
 import sk.uniza.fri.pds.spotreba.energie.service.util.SpendingStatisticsParameters;

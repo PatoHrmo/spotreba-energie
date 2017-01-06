@@ -8,7 +8,7 @@ package sk.uniza.fri.pds.spotreba.energie.domain;
 import java.io.Serializable;
 import org.metawidget.inspector.annotation.UiComesAfter;
 import org.metawidget.inspector.annotation.UiHidden;
-import sk.uniza.fri.pds.spotreba.energie.gui.DisplayPriority;
+import sk.uniza.fri.pds.spotreba.energie.gui.utils.DisplayPriority;
 
 public class SeAdresa implements Serializable {
 

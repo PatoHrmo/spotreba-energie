@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package sk.uniza.fri.pds.spotreba.energie.gui;
+package sk.uniza.fri.pds.spotreba.energie.gui.utils;
 
 import com.toedter.calendar.JDateChooser;
 import java.awt.image.BufferedImage;
@@ -26,6 +26,8 @@ import org.metawidget.swing.widgetprocessor.binding.beansbinding.BeansBindingPro
 import org.metawidget.widgetbuilder.composite.CompositeWidgetBuilder;
 import org.metawidget.widgetbuilder.composite.CompositeWidgetBuilderConfig;
 import org.metawidget.widgetprocessor.iface.WidgetProcessor;
+import sk.uniza.fri.pds.spotreba.energie.gui.DbTab;
+import sk.uniza.fri.pds.spotreba.energie.gui.ImagePanel;
 
 public class MetawidgetUtils {
 

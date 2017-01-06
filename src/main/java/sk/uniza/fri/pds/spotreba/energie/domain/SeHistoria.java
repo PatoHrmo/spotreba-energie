@@ -7,7 +7,7 @@ package sk.uniza.fri.pds.spotreba.energie.domain;
 
 import java.io.Serializable;
 import java.util.Date;
-import sk.uniza.fri.pds.spotreba.energie.gui.TableHidden;
+import sk.uniza.fri.pds.spotreba.energie.gui.utils.TableHidden;
 
 public class SeHistoria implements Serializable {
 

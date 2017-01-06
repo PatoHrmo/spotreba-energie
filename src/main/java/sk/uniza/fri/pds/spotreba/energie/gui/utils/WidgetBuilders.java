@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package sk.uniza.fri.pds.spotreba.energie.gui;
+package sk.uniza.fri.pds.spotreba.energie.gui.utils;
 
 import com.toedter.calendar.JDateChooser;
 import java.awt.Component;
@@ -18,6 +18,7 @@ import javax.swing.JComboBox;
 import static org.metawidget.inspector.InspectionResultConstants.*;
 import org.metawidget.swing.SwingMetawidget;
 import org.metawidget.widgetbuilder.iface.WidgetBuilder;
+import sk.uniza.fri.pds.spotreba.energie.gui.ImagePanel;
 
 public class WidgetBuilders {
 

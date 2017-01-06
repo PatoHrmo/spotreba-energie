@@ -5,6 +5,7 @@
  */
 package sk.uniza.fri.pds.spotreba.energie.gui;
 
+import sk.uniza.fri.pds.spotreba.energie.gui.utils.MetawidgetUtils;
 import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.ExecutionException;

@@ -1,7 +1,7 @@
 package sk.uniza.fri.pds.spotreba.energie.domain;
 
 import sk.uniza.fri.pds.spotreba.energie.domain.util.MeraciaVelicina;
-import sk.uniza.fri.pds.spotreba.energie.gui.DisplayPriority;
+import sk.uniza.fri.pds.spotreba.energie.gui.utils.DisplayPriority;
 
 public class ZvysenieSpotreby {
 
