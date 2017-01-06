@@ -9,6 +9,8 @@ import java.awt.Dimension;
 import java.awt.HeadlessException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
@@ -69,6 +71,8 @@ public class MainGui extends javax.swing.JFrame {
         spendingMenu = new javax.swing.JMenu();
         showSpendingStatistics = new javax.swing.JMenuItem();
         increasedSpending = new javax.swing.JMenuItem();
+        jMenuItem1 = new javax.swing.JMenuItem();
+        jMenuItem2 = new javax.swing.JMenuItem();
         typeAndCatMenuItem = new javax.swing.JMenuItem();
         servisMenu = new javax.swing.JMenu();
         servisStatsMenuItem = new javax.swing.JMenuItem();
@@ -89,13 +93,24 @@ public class MainGui extends javax.swing.JFrame {
         });
         spendingMenu.add(showSpendingStatistics);
 
-        increasedSpending.setText("Zvýšená spotreba");
+        increasedSpending.setText("Zvýšená spotreba o aspoň 20%");
         increasedSpending.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 increasedSpendingActionPerformed(evt);
             }
         });
         spendingMenu.add(increasedSpending);
+
+        jMenuItem1.setText("Zvýšená spotreba o aspoň 50% v poslednom roku");
+        jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem1ActionPerformed(evt);
+            }
+        });
+        spendingMenu.add(jMenuItem1);
+
+        jMenuItem2.setText("Spotreba b poslednom roku menšia ako 10% priemeru");
+        spendingMenu.add(jMenuItem2);
 
         typeAndCatMenuItem.setText("Štatistika podľa typu a kategórie");
         typeAndCatMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -163,7 +178,7 @@ public class MainGui extends javax.swing.JFrame {
         final IncreasedSpendingStatisticParams params = new IncreasedSpendingStatisticParams();
         int option = showUniversalInputDialog(params, "Zvýšená spotreba");
         if (option == JOptionPane.OK_OPTION) {
-            List<ZvysenieSpotreby> spendingStatistics = SeHistoriaService.getInstance().getIncreasedSpendingStatistics(params);
+            List<ZvysenieSpotreby> spendingStatistics = SeHistoriaService.getInstance().getIncreasedSpendingStatistics(params, 1.2);
 
             JScrollPane jScrollPane = new JScrollPane();
             final BeanTableModel beanTableModel = new BeanTableModel(ZvysenieSpotreby.class, spendingStatistics);
@@ -205,6 +220,28 @@ public class MainGui extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, jScrollPane);
         }
     }//GEN-LAST:event_typeAndCatMenuItemActionPerformed
+
+    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
+        showLastYearChange();
+    }//GEN-LAST:event_jMenuItem1ActionPerformed
+
+    private void showLastYearChange() throws HeadlessException {
+        final IncreasedSpendingStatisticParams params = new IncreasedSpendingStatisticParams();
+        params.setDatumDo(new Date());
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.MONTH, -1);
+        Date result = cal.getTime();
+        params.setDatumOd(result);
+
+        List<ZvysenieSpotreby> spendingStatistics = SeHistoriaService.getInstance().getIncreasedSpendingStatistics(params, 1.5);
+
+        JScrollPane jScrollPane = new JScrollPane();
+        final BeanTableModel beanTableModel = new BeanTableModel(ZvysenieSpotreby.class, spendingStatistics);
+        beanTableModel.sortColumnNames();
+        JTable jTable = new JTable(beanTableModel);
+        jScrollPane.getViewport().add(jTable);
+        JOptionPane.showMessageDialog(null, jScrollPane);
+    }
 
     private int showUniversalInputDialog(final Object params, String title) throws HeadlessException {
         SwingMetawidget metawidget = new SwingMetawidget();
@@ -254,6 +291,8 @@ public class MainGui extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem increasedSpending;
+    private javax.swing.JMenuItem jMenuItem1;
+    private javax.swing.JMenuItem jMenuItem2;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JMenu servisMenu;
     private javax.swing.JMenuItem servisStatsMenuItem;
