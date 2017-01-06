@@ -5,10 +5,13 @@
  */
 package sk.uniza.fri.pds.spotreba.energie.gui;
 
+import java.awt.HeadlessException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -23,7 +26,9 @@ import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.data.xy.IntervalXYDataset;
 import org.metawidget.swing.SwingMetawidget;
 import sk.uniza.fri.pds.spotreba.energie.domain.KrokSpotreby;
+import sk.uniza.fri.pds.spotreba.energie.domain.ZvysenieSpotreby;
 import sk.uniza.fri.pds.spotreba.energie.service.SeHistoriaService;
+import sk.uniza.fri.pds.spotreba.energie.service.util.IncreasedSpendingStatisticParams;
 import sk.uniza.fri.pds.spotreba.energie.service.util.SpendingStatisticsParameters;
 
 /**
@@ -56,6 +61,7 @@ public class MainGui extends javax.swing.JFrame {
         menuBar = new javax.swing.JMenuBar();
         statisticsMenu = new javax.swing.JMenu();
         showSpendingStatistics = new javax.swing.JMenuItem();
+        increasedSpending = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -73,6 +79,14 @@ public class MainGui extends javax.swing.JFrame {
         });
         statisticsMenu.add(showSpendingStatistics);
 
+        increasedSpending.setText("Zvýšená spotreba");
+        increasedSpending.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                increasedSpendingActionPerformed(evt);
+            }
+        });
+        statisticsMenu.add(increasedSpending);
+
         menuBar.add(statisticsMenu);
 
         setJMenuBar(menuBar);
@@ -81,15 +95,8 @@ public class MainGui extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void showSpendingStatisticsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showSpendingStatisticsActionPerformed
-        SwingMetawidget metawidget = new SwingMetawidget();
-        MetawidgetUtils.setCommonSettings(metawidget);
         final SpendingStatisticsParameters params = new SpendingStatisticsParameters();
-        metawidget.setToInspect(params);
-        Object[] message = {
-            metawidget
-        };
-
-        int option = JOptionPane.showConfirmDialog(null, message, "Vývoj spotreby", JOptionPane.OK_CANCEL_OPTION);
+        int option = showUniversalInputDialog(params, "Vývoj spotreby");
         if (option == JOptionPane.OK_OPTION) {
             List<KrokSpotreby> spendingStatistics = SeHistoriaService.getInstance().getSpendingStatistics(params);
             final TimeSeries series = new TimeSeries("");
@@ -121,6 +128,31 @@ public class MainGui extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, new ChartPanel(chart));
         }
     }//GEN-LAST:event_showSpendingStatisticsActionPerformed
+
+    private void increasedSpendingActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_increasedSpendingActionPerformed
+        final IncreasedSpendingStatisticParams params = new IncreasedSpendingStatisticParams();
+        int option = showUniversalInputDialog(params, "Zvýšená spotreba");
+        if (option == JOptionPane.OK_OPTION) {
+            List<ZvysenieSpotreby> spendingStatistics = SeHistoriaService.getInstance().getIncreasedSpendingStatistics(params);
+            final TimeSeries series = new TimeSeries("");
+
+            JScrollPane jScrollPane = new JScrollPane();
+            JTable jTable = new JTable(new BeanTableModel(ZvysenieSpotreby.class, spendingStatistics));
+            jScrollPane.getViewport().add(jTable);
+            JOptionPane.showMessageDialog(null, jScrollPane);
+        }
+    }//GEN-LAST:event_increasedSpendingActionPerformed
+
+    private int showUniversalInputDialog(final Object params, String title) throws HeadlessException {
+        SwingMetawidget metawidget = new SwingMetawidget();
+        MetawidgetUtils.setCommonSettings(metawidget);
+        metawidget.setToInspect(params);
+        Object[] message = {
+            metawidget
+        };
+        int option = JOptionPane.showConfirmDialog(null, message, title, JOptionPane.OK_CANCEL_OPTION);
+        return option;
+    }
 
     /**
      * @param args the command line arguments
@@ -158,6 +190,7 @@ public class MainGui extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JMenuItem increasedSpending;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JMenuItem showSpendingStatistics;
     private javax.swing.JMenu statisticsMenu;
