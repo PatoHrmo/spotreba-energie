@@ -28,6 +28,7 @@ import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.data.xy.IntervalXYDataset;
 import org.metawidget.swing.SwingMetawidget;
+import sk.uniza.fri.pds.spotreba.energie.domain.CelkovaStatistika;
 import sk.uniza.fri.pds.spotreba.energie.domain.KrokSpotreby;
 import sk.uniza.fri.pds.spotreba.energie.domain.StatistikaServisov;
 import sk.uniza.fri.pds.spotreba.energie.domain.StatistikaTypuKategorie;
@@ -38,6 +39,7 @@ import sk.uniza.fri.pds.spotreba.energie.service.SeHistoriaService;
 import sk.uniza.fri.pds.spotreba.energie.service.SeServisService;
 import sk.uniza.fri.pds.spotreba.energie.service.util.IncreasedSpendingStatisticParams;
 import sk.uniza.fri.pds.spotreba.energie.service.util.SpendingStatisticsParameters;
+import sk.uniza.fri.pds.spotreba.energie.service.util.StatistikaSpotriebParams;
 import sk.uniza.fri.pds.spotreba.energie.service.util.StatistikaTypuKategorieParams;
 
 /**
@@ -74,6 +76,7 @@ public class MainGui extends javax.swing.JFrame {
         jMenuItem1 = new javax.swing.JMenuItem();
         jMenuItem2 = new javax.swing.JMenuItem();
         typeAndCatMenuItem = new javax.swing.JMenuItem();
+        jMenuItem3 = new javax.swing.JMenuItem();
         servisMenu = new javax.swing.JMenu();
         servisStatsMenuItem = new javax.swing.JMenuItem();
 
@@ -124,6 +127,14 @@ public class MainGui extends javax.swing.JFrame {
             }
         });
         spendingMenu.add(typeAndCatMenuItem);
+
+        jMenuItem3.setText("Celkové štatistiky");
+        jMenuItem3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem3ActionPerformed(evt);
+            }
+        });
+        spendingMenu.add(jMenuItem3);
 
         menuBar.add(spendingMenu);
 
@@ -234,6 +245,23 @@ public class MainGui extends javax.swing.JFrame {
         showLastYearChange(0.9);
     }//GEN-LAST:event_jMenuItem2ActionPerformed
 
+    private void jMenuItem3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem3ActionPerformed
+        final StatistikaSpotriebParams params = new StatistikaSpotriebParams();
+        int option = showUniversalInputDialog(params, "Štatistika podľa typu a kategórie");
+        if (option == JOptionPane.OK_OPTION) {
+            List<CelkovaStatistika> overalStatistics = SeHistoriaService.getInstance().getOveralStatistics(params);
+            JScrollPane jScrollPane = new JScrollPane();
+            Dimension dimension = new Dimension(1200, 400);
+            jScrollPane.setSize(dimension);
+            jScrollPane.setPreferredSize(dimension);
+            final BeanTableModel beanTableModel = new BeanTableModel(CelkovaStatistika.class, overalStatistics);
+            beanTableModel.sortColumnNames();
+            JTable jTable = new JTable(beanTableModel);
+            jScrollPane.getViewport().add(jTable);
+            JOptionPane.showMessageDialog(null, jScrollPane);
+        }
+    }//GEN-LAST:event_jMenuItem3ActionPerformed
+
     private void showLastYearChange(double factor) throws HeadlessException {
         final IncreasedSpendingStatisticParams params = new IncreasedSpendingStatisticParams();
         params.setDatumDo(new Date());
@@ -305,6 +333,7 @@ public class MainGui extends javax.swing.JFrame {
     private javax.swing.JMenuItem increasedSpending;
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JMenuItem jMenuItem2;
+    private javax.swing.JMenuItem jMenuItem3;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JMenu servisMenu;
     private javax.swing.JMenuItem servisStatsMenuItem;

@@ -5,13 +5,17 @@
  */
 package sk.uniza.fri.pds.spotreba.energie.service;
 
+import java.math.BigDecimal;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Struct;
+import java.sql.Timestamp;
 import java.util.LinkedList;
 import java.util.List;
 import sk.uniza.fri.pds.spotreba.energie.OracleJDBCConnector;
+import sk.uniza.fri.pds.spotreba.energie.domain.CelkovaStatistika;
 import sk.uniza.fri.pds.spotreba.energie.domain.KrokSpotreby;
 import sk.uniza.fri.pds.spotreba.energie.domain.SeHistoria;
 import sk.uniza.fri.pds.spotreba.energie.domain.StatistikaTypuKategorie;
@@ -19,6 +23,7 @@ import sk.uniza.fri.pds.spotreba.energie.domain.ZvysenieSpotreby;
 import sk.uniza.fri.pds.spotreba.energie.domain.util.MeraciaVelicina;
 import sk.uniza.fri.pds.spotreba.energie.service.util.IncreasedSpendingStatisticParams;
 import sk.uniza.fri.pds.spotreba.energie.service.util.SpendingStatisticsParameters;
+import sk.uniza.fri.pds.spotreba.energie.service.util.StatistikaSpotriebParams;
 import sk.uniza.fri.pds.spotreba.energie.service.util.StatistikaTypuKategorieParams;
 
 public class SeHistoriaService implements SeService<SeHistoria> {
@@ -144,6 +149,32 @@ public class SeHistoriaService implements SeService<SeHistoria> {
                 o.setMaximalnaSpotreba(result.getDouble("MAX_SPOTREBA"));
                 o.setMesiacMaximalnejSpotreby(result.getInt("MESIAC_MAX_SPOTREBY"));
                 o.setPriemernaSpotreba(result.getDouble("PRIEMER"));
+                output.add(o);
+            }
+            return output;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<CelkovaStatistika> getOveralStatistics(StatistikaSpotriebParams params) {
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("SELECT get_najm_najve_spotreba(?,?,?,?,?,?) from dual");
+            stmnt.setString(1, params.getTypOdberatela().val.toString());
+            stmnt.setString(2, params.getKategoriaOdberatela().name());
+            stmnt.setInt(3, params.getIdRegionu());
+            stmnt.setString(4, params.getVelicina().name().toLowerCase());
+            stmnt.setDate(5, Utils.utilDateToSqlDate(params.getDatumOd()));
+            stmnt.setDate(6, Utils.utilDateToSqlDate(params.getDatumDo()));
+            ResultSet result = stmnt.executeQuery();
+            List<CelkovaStatistika> output = new LinkedList<>();
+            while (result.next()) {
+                CelkovaStatistika o = new CelkovaStatistika();
+                Object[] attributes = ((Struct) result.getObject(1)).getAttributes();
+                o.setMesiacMinimalnejSpotreby(((Timestamp) attributes[0]));
+                o.setMinimalnaSpotreba(((BigDecimal) attributes[1]).intValue());
+                o.setMesiacMaximalnejSpotreby(((Timestamp) attributes[2]));
+                o.setMaximalnaSpotreba(((BigDecimal) attributes[3]).intValue());
                 output.add(o);
             }
             return output;

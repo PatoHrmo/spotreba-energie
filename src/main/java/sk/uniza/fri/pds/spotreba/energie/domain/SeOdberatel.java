@@ -63,7 +63,7 @@ public class SeOdberatel implements Serializable {
     public enum TypOdberatela {
         DOMACNOST('D'), FIRMA('F');
 
-        public final char val;
+        public final Character val;
 
         private TypOdberatela(char val) {
             this.val = val;
