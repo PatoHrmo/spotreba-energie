@@ -108,9 +108,10 @@ public class SeHistoriaService implements SeService<SeHistoria> {
 
     public List<ZvysenieSpotreby> getIncreasedSpendingStatistics(IncreasedSpendingStatisticParams params) {
         try (Connection connection = OracleJDBCConnector.getConnection();) {
-            CallableStatement stmnt = connection.prepareCall("SELECT * FROM TABLE(get_zvysena_miera_spotreby(?,?))");
+            CallableStatement stmnt = connection.prepareCall("SELECT * FROM TABLE(get_zvysena_miera_spotreby(?,?,?))");
             stmnt.setDate(1, Utils.utilDateToSqlDate(params.getDatumOd()));
             stmnt.setDate(2, Utils.utilDateToSqlDate(params.getDatumDo()));
+            stmnt.setDouble(3, 1.2);
             ResultSet result = stmnt.executeQuery();
             List<ZvysenieSpotreby> output = new LinkedList<>();
             while (result.next()) {
