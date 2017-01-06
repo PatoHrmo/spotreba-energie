@@ -35,9 +35,11 @@ import sk.uniza.fri.pds.spotreba.energie.domain.StatistikaTypuKategorie;
 import sk.uniza.fri.pds.spotreba.energie.domain.ZvysenieSpotreby;
 import sk.uniza.fri.pds.spotreba.energie.gui.utils.DbClass;
 import sk.uniza.fri.pds.spotreba.energie.gui.utils.MetawidgetUtils;
+import sk.uniza.fri.pds.spotreba.energie.service.NajminajucejsiSpotrebitel;
 import sk.uniza.fri.pds.spotreba.energie.service.SeHistoriaService;
 import sk.uniza.fri.pds.spotreba.energie.service.SeServisService;
 import sk.uniza.fri.pds.spotreba.energie.service.util.IncreasedSpendingStatisticParams;
+import sk.uniza.fri.pds.spotreba.energie.service.util.NajminajucejsiSpotrebiteliaParams;
 import sk.uniza.fri.pds.spotreba.energie.service.util.SpendingStatisticsParameters;
 import sk.uniza.fri.pds.spotreba.energie.service.util.StatistikaSpotriebParams;
 import sk.uniza.fri.pds.spotreba.energie.service.util.StatistikaTypuKategorieParams;
@@ -76,6 +78,7 @@ public class MainGui extends javax.swing.JFrame {
         jMenuItem1 = new javax.swing.JMenuItem();
         jMenuItem2 = new javax.swing.JMenuItem();
         typeAndCatMenuItem = new javax.swing.JMenuItem();
+        jMenuItem4 = new javax.swing.JMenuItem();
         jMenuItem3 = new javax.swing.JMenuItem();
         servisMenu = new javax.swing.JMenu();
         servisStatsMenuItem = new javax.swing.JMenuItem();
@@ -127,6 +130,14 @@ public class MainGui extends javax.swing.JFrame {
             }
         });
         spendingMenu.add(typeAndCatMenuItem);
+
+        jMenuItem4.setText("10% spotrebitelov s najväčšou spotrebou");
+        jMenuItem4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem4ActionPerformed(evt);
+            }
+        });
+        spendingMenu.add(jMenuItem4);
 
         jMenuItem3.setText("Celkové štatistiky");
         jMenuItem3.addActionListener(new java.awt.event.ActionListener() {
@@ -262,6 +273,20 @@ public class MainGui extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jMenuItem3ActionPerformed
 
+    private void jMenuItem4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem4ActionPerformed
+        final NajminajucejsiSpotrebiteliaParams params = new NajminajucejsiSpotrebiteliaParams();
+        int option = showUniversalInputDialog(params, "10% spotrebiteľou s najväčšou spotrebou");
+        if (option == JOptionPane.OK_OPTION) {
+            List<NajminajucejsiSpotrebitel> overalStatistics = SeHistoriaService.getInstance().getNajnminajucejsiSpotrebitelia(params);
+            JScrollPane jScrollPane = new JScrollPane();
+            final BeanTableModel beanTableModel = new BeanTableModel(NajminajucejsiSpotrebitel.class, overalStatistics);
+            beanTableModel.sortColumnNames();
+            JTable jTable = new JTable(beanTableModel);
+            jScrollPane.getViewport().add(jTable);
+            JOptionPane.showMessageDialog(null, jScrollPane);
+        }
+    }//GEN-LAST:event_jMenuItem4ActionPerformed
+
     private void showLastYearChange(double factor) throws HeadlessException {
         final IncreasedSpendingStatisticParams params = new IncreasedSpendingStatisticParams();
         params.setDatumDo(new Date());
@@ -334,6 +359,7 @@ public class MainGui extends javax.swing.JFrame {
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JMenuItem jMenuItem2;
     private javax.swing.JMenuItem jMenuItem3;
+    private javax.swing.JMenuItem jMenuItem4;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JMenu servisMenu;
     private javax.swing.JMenuItem servisStatsMenuItem;

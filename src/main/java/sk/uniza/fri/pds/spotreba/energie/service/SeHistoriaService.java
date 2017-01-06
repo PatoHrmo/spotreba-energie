@@ -22,6 +22,7 @@ import sk.uniza.fri.pds.spotreba.energie.domain.StatistikaTypuKategorie;
 import sk.uniza.fri.pds.spotreba.energie.domain.ZvysenieSpotreby;
 import sk.uniza.fri.pds.spotreba.energie.domain.util.MeraciaVelicina;
 import sk.uniza.fri.pds.spotreba.energie.service.util.IncreasedSpendingStatisticParams;
+import sk.uniza.fri.pds.spotreba.energie.service.util.NajminajucejsiSpotrebiteliaParams;
 import sk.uniza.fri.pds.spotreba.energie.service.util.SpendingStatisticsParameters;
 import sk.uniza.fri.pds.spotreba.energie.service.util.StatistikaSpotriebParams;
 import sk.uniza.fri.pds.spotreba.energie.service.util.StatistikaTypuKategorieParams;
@@ -175,6 +176,32 @@ public class SeHistoriaService implements SeService<SeHistoria> {
                 o.setMinimalnaSpotreba(((BigDecimal) attributes[1]).intValue());
                 o.setMesiacMaximalnejSpotreby(((Timestamp) attributes[2]));
                 o.setMaximalnaSpotreba(((BigDecimal) attributes[3]).intValue());
+                output.add(o);
+            }
+            return output;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<NajminajucejsiSpotrebitel> getNajnminajucejsiSpotrebitelia(NajminajucejsiSpotrebiteliaParams params) {
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("select meno, cislo_odberatela from (select  rank() over (\n"
+                    + "  order by get_spotreba_za_obdobie(cislo_odberatela,?,?,?)) as rn,\n"
+                    + "  count(*) over() as pocet,\n"
+                    + "  meno||' '||priezvisko as meno,\n"
+                    + "  cislo_odberatela \n"
+                    + "  from SE_ODBERATEL join SE_OSOBA using(rod_cislo)) \n"
+                    + "where rn<pocet*0.1");
+            stmnt.setString(3, params.getVelicina().name().toLowerCase());
+            stmnt.setDate(1, Utils.utilDateToSqlDate(params.getDatumOd()));
+            stmnt.setDate(2, Utils.utilDateToSqlDate(params.getDatumDo()));
+            ResultSet result = stmnt.executeQuery();
+            List<NajminajucejsiSpotrebitel> output = new LinkedList<>();
+            while (result.next()) {
+                NajminajucejsiSpotrebitel o = new NajminajucejsiSpotrebitel();
+                o.setMeno(result.getString("meno"));
+                o.setCisloOdberatela(result.getInt("cislo_odberatela"));
                 output.add(o);
             }
             return output;
