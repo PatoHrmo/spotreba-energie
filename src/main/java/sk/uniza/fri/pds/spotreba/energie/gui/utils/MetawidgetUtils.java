@@ -9,6 +9,7 @@ import com.toedter.calendar.JDateChooser;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Date;
@@ -27,6 +28,7 @@ import org.metawidget.widgetbuilder.composite.CompositeWidgetBuilder;
 import org.metawidget.widgetbuilder.composite.CompositeWidgetBuilderConfig;
 import org.metawidget.widgetprocessor.iface.WidgetProcessor;
 import sk.uniza.fri.pds.spotreba.energie.gui.DbTab;
+import sk.uniza.fri.pds.spotreba.energie.gui.FilePanel;
 import sk.uniza.fri.pds.spotreba.energie.gui.ImagePanel;
 
 public class MetawidgetUtils {
@@ -34,8 +36,13 @@ public class MetawidgetUtils {
     public static void setCommonSettings(SwingMetawidget metawidget) {
         metawidget.setWidgetBuilder(new CompositeWidgetBuilder<>(new CompositeWidgetBuilderConfig()
                 .setWidgetBuilders(
-                        new OverriddenWidgetBuilder(), new ReadOnlyWidgetBuilder(),
-                        new WidgetBuilders.DateWidgetBuilder(), new WidgetBuilders.ImageWidgetBuilder(), new WidgetBuilders.EnumWidgetBuilder(), new SwingWidgetBuilder()
+                        new OverriddenWidgetBuilder(),
+                        new ReadOnlyWidgetBuilder(),
+                        new WidgetBuilders.DateWidgetBuilder(),
+                        new WidgetBuilders.ImageWidgetBuilder(),
+                        new WidgetBuilders.EnumWidgetBuilder(),
+                        new WidgetBuilders.FileWidgetBuilder(),
+                        new SwingWidgetBuilder()
                 )));
         metawidget.addWidgetProcessor(new BeansBindingProcessor(
                 new BeansBindingProcessorConfig()
@@ -54,6 +61,23 @@ public class MetawidgetUtils {
                                     o = m.getToInspect();
                                     final String name = map.get("name");
                                     Method method = o.getClass().getMethod("set" + name.substring(0, 1).toUpperCase() + name.substring(1), BufferedImage.class);
+                                    method.invoke(o, e.getNewValue());
+                                } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+                                    Logger.getLogger(DbTab.class.getName()).log(Level.SEVERE, null, ex);
+                                }
+                            }
+                        }
+                    });
+                } else if (w instanceof FilePanel) {
+                    ((FilePanel) w).addPropertyChangeListener(new PropertyChangeListener() {
+                        @Override
+                        public void propertyChange(PropertyChangeEvent e) {
+                            if ("file".equals(e.getPropertyName())) {
+                                try {
+                                    Object o;
+                                    o = m.getToInspect();
+                                    final String name = map.get("name");
+                                    Method method = o.getClass().getMethod("set" + name.substring(0, 1).toUpperCase() + name.substring(1), File.class);
                                     method.invoke(o, e.getNewValue());
                                 } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
                                     Logger.getLogger(DbTab.class.getName()).log(Level.SEVERE, null, ex);
