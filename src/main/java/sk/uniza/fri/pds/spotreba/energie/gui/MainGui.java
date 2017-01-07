@@ -12,9 +12,13 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.SwingWorker;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -31,6 +35,7 @@ import org.metawidget.swing.SwingMetawidget;
 import sk.uniza.fri.pds.spotreba.energie.domain.CelkovaStatistika;
 import sk.uniza.fri.pds.spotreba.energie.domain.KrokSpotreby;
 import sk.uniza.fri.pds.spotreba.energie.domain.SeZamestnanecInfo;
+import sk.uniza.fri.pds.spotreba.energie.domain.SpotrebaDomacnosti;
 import sk.uniza.fri.pds.spotreba.energie.domain.StatistikaServisov;
 import sk.uniza.fri.pds.spotreba.energie.domain.StatistikaTypuKategorie;
 import sk.uniza.fri.pds.spotreba.energie.domain.ZvysenieSpotreby;
@@ -40,6 +45,7 @@ import sk.uniza.fri.pds.spotreba.energie.service.NajminajucejsiSpotrebitel;
 import sk.uniza.fri.pds.spotreba.energie.service.SeHistoriaService;
 import sk.uniza.fri.pds.spotreba.energie.service.SeServisService;
 import sk.uniza.fri.pds.spotreba.energie.service.SeZamestnanecService;
+import sk.uniza.fri.pds.spotreba.energie.service.ZamestnanecOdpisReport;
 import sk.uniza.fri.pds.spotreba.energie.service.util.IncreasedSpendingStatisticParams;
 import sk.uniza.fri.pds.spotreba.energie.service.util.NajminajucejsiSpotrebiteliaParams;
 import sk.uniza.fri.pds.spotreba.energie.service.util.SpendingStatisticsParameters;
@@ -85,8 +91,10 @@ public class MainGui extends javax.swing.JFrame {
         jMenuItem3 = new javax.swing.JMenuItem();
         servisMenu = new javax.swing.JMenu();
         servisStatsMenuItem = new javax.swing.JMenuItem();
+        jMenuItem7 = new javax.swing.JMenuItem();
         jMenu1 = new javax.swing.JMenu();
         jMenuItem5 = new javax.swing.JMenuItem();
+        jMenuItem6 = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -164,6 +172,14 @@ public class MainGui extends javax.swing.JFrame {
         });
         servisMenu.add(servisStatsMenuItem);
 
+        jMenuItem7.setText("Zobraziť informácie o spotrebe domácností ktoré mali za posledný rok vymené 2 zariadenia na meranie rovnakej veličiny");
+        jMenuItem7.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem7ActionPerformed(evt);
+            }
+        });
+        servisMenu.add(jMenuItem7);
+
         menuBar.add(servisMenu);
 
         jMenu1.setText("Zamestnanci");
@@ -176,6 +192,14 @@ public class MainGui extends javax.swing.JFrame {
         });
         jMenu1.add(jMenuItem5);
 
+        jMenuItem6.setText("Zobraziť najvýkonnejších 3 zamestnancov za posledný rok");
+        jMenuItem6.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem6ActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jMenuItem6);
+
         menuBar.add(jMenu1);
 
         setJMenuBar(menuBar);
@@ -187,34 +211,61 @@ public class MainGui extends javax.swing.JFrame {
         final SpendingStatisticsParameters params = new SpendingStatisticsParameters();
         int option = showUniversalInputDialog(params, "Vývoj spotreby");
         if (option == JOptionPane.OK_OPTION) {
-            List<KrokSpotreby> spendingStatistics = SeHistoriaService.getInstance().getSpendingStatistics(params);
-            final TimeSeries series = new TimeSeries("");
+            new SwingWorker<List, RuntimeException>() {
+                @Override
+                protected List doInBackground() throws Exception {
+                    try {
+                        return SeHistoriaService.getInstance().getSpendingStatistics(params);
+                    } catch (RuntimeException e) {
+                        publish(e);
+                        return null;
+                    }
+                }
 
-            final String title = "Vývoj spotreby";
-            for (KrokSpotreby krok : spendingStatistics) {
-                series.add(new Month(krok.getDatumOd()), krok.getSpotreba());
-            }
-            final IntervalXYDataset dataset = (IntervalXYDataset) new TimeSeriesCollection(series);
-            JFreeChart chart = ChartFactory.createXYBarChart(
-                    title, // title
-                    "", // x-axis label
-                    true, // date axis?
-                    "", // y-axis label
-                    dataset, // data
-                    PlotOrientation.VERTICAL, // orientation
-                    false, // create legend?
-                    true, // generate tooltips?
-                    false // generate URLs?
-            );
+                @Override
+                protected void done() {
+                    try {
+                        List<KrokSpotreby> spendingStatistics = get();
+                        if (spendingStatistics != null) {
+                            final TimeSeries series = new TimeSeries("");
+                            final String title = "Vývoj spotreby";
+                            for (KrokSpotreby krok : spendingStatistics) {
+                                series.add(new Month(krok.getDatumOd()), krok.getSpotreba());
+                            }
+                            final IntervalXYDataset dataset = (IntervalXYDataset) new TimeSeriesCollection(series);
+                            JFreeChart chart = ChartFactory.createXYBarChart(
+                                    title, // title
+                                    "", // x-axis label
+                                    true, // date axis?
+                                    "", // y-axis label
+                                    dataset, // data
+                                    PlotOrientation.VERTICAL, // orientation
+                                    false, // create legend?
+                                    true, // generate tooltips?
+                                    false // generate URLs?
+                            );
 
-            // Set date axis style
-            DateAxis axis = (DateAxis) ((XYPlot) chart.getPlot()).getDomainAxis();
-            axis.setDateFormatOverride(new SimpleDateFormat("yyyy"));
-            DateFormat formatter = new SimpleDateFormat("yyyy");
-            DateTickUnit unit = new DateTickUnit(DateTickUnitType.YEAR, 1, formatter);
-            axis.setTickUnit(unit);
+                            // Set date axis style
+                            DateAxis axis = (DateAxis) ((XYPlot) chart.getPlot()).getDomainAxis();
+                            axis.setDateFormatOverride(new SimpleDateFormat("yyyy"));
+                            DateFormat formatter = new SimpleDateFormat("yyyy");
+                            DateTickUnit unit = new DateTickUnit(DateTickUnitType.YEAR, 1, formatter);
+                            axis.setTickUnit(unit);
+                            JOptionPane.showMessageDialog(null, new ChartPanel(chart));
+                        }
+                    } catch (InterruptedException | ExecutionException ex) {
+                        Logger.getLogger(MainGui.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
 
-            JOptionPane.showMessageDialog(null, new ChartPanel(chart));
+                @Override
+                protected void process(List<RuntimeException> chunks) {
+                    if (chunks.size() > 0) {
+                        showException("Chyba", chunks.get(0));
+                    }
+                }
+
+            }.execute();
         }
     }//GEN-LAST:event_showSpendingStatisticsActionPerformed
 
@@ -222,46 +273,104 @@ public class MainGui extends javax.swing.JFrame {
         final IncreasedSpendingStatisticParams params = new IncreasedSpendingStatisticParams();
         int option = showUniversalInputDialog(params, "Zvýšená spotreba");
         if (option == JOptionPane.OK_OPTION) {
-            List<ZvysenieSpotreby> spendingStatistics = SeHistoriaService.getInstance().getIncreasedSpendingStatistics(params, 1.2);
 
-            JScrollPane jScrollPane = new JScrollPane();
-            final BeanTableModel beanTableModel = new BeanTableModel(ZvysenieSpotreby.class, spendingStatistics);
-            beanTableModel.sortColumnNames();
-            JTable jTable = new JTable(beanTableModel);
-            jScrollPane.getViewport().add(jTable);
-            JOptionPane.showMessageDialog(null, jScrollPane);
+            new SwingWorker<List, RuntimeException>() {
+                @Override
+                protected List doInBackground() throws Exception {
+                    try {
+                        return SeHistoriaService.getInstance().getIncreasedSpendingStatistics(params, 1.2);
+                    } catch (RuntimeException e) {
+                        publish(e);
+                        return null;
+                    }
+                }
+
+                @Override
+                protected void done() {
+                    try {
+                        List data = get();
+                        showJTable(ZvysenieSpotreby.class, data);
+                    } catch (InterruptedException | ExecutionException ex) {
+                        Logger.getLogger(MainGui.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+
+                @Override
+                protected void process(List<RuntimeException> chunks) {
+                    if (chunks.size() > 0) {
+                        showException("Chyba", chunks.get(0));
+                    }
+                }
+            }.execute();
         }
     }//GEN-LAST:event_increasedSpendingActionPerformed
 
     private void servisStatsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_servisStatsMenuItemActionPerformed
-        List<StatistikaServisov> spendingStatistics = SeServisService.getInstance().getServiceStatistics();
+        new SwingWorker<List, RuntimeException>() {
+            @Override
+            protected List doInBackground() throws Exception {
+                try {
+                    return SeServisService.getInstance().getServiceStatistics();
+                } catch (RuntimeException e) {
+                    publish(e);
+                    return null;
+                }
+            }
 
-        JScrollPane jScrollPane = new JScrollPane();
-        Dimension dimension = new Dimension(1200, 400);
-        jScrollPane.setSize(dimension);
-        jScrollPane.setPreferredSize(dimension);
-        final BeanTableModel beanTableModel = new BeanTableModel(StatistikaServisov.class, spendingStatistics);
-        beanTableModel.sortColumnNames();
-        JTable jTable = new JTable(beanTableModel);
-        jScrollPane.getViewport().add(jTable);
-        JOptionPane.showMessageDialog(null, jScrollPane);
+            @Override
+            protected void done() {
+                try {
+                    List data = get();
+                    showJTable(StatistikaServisov.class, data);
+                } catch (InterruptedException | ExecutionException ex) {
+                    Logger.getLogger(MainGui.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+
+            @Override
+            protected void process(List<RuntimeException> chunks) {
+                if (chunks.size() > 0) {
+                    showException("Chyba", chunks.get(0));
+                }
+            }
+
+        }.execute();
+
     }//GEN-LAST:event_servisStatsMenuItemActionPerformed
 
     private void typeAndCatMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_typeAndCatMenuItemActionPerformed
         final StatistikaTypuKategorieParams params = new StatistikaTypuKategorieParams();
         int option = showUniversalInputDialog(params, "Štatistika podľa typu a kategórie");
         if (option == JOptionPane.OK_OPTION) {
-            List<StatistikaTypuKategorie> spendingStatistics = SeHistoriaService.getInstance().getTypeAndCategoryStatistics(params);
+            new SwingWorker<List, RuntimeException>() {
+                @Override
+                protected List doInBackground() throws Exception {
+                    try {
+                        return SeHistoriaService.getInstance().getTypeAndCategoryStatistics(params);
+                    } catch (RuntimeException e) {
+                        publish(e);
+                        return null;
+                    }
+                }
 
-            JScrollPane jScrollPane = new JScrollPane();
-            Dimension dimension = new Dimension(1200, 400);
-            jScrollPane.setSize(dimension);
-            jScrollPane.setPreferredSize(dimension);
-            final BeanTableModel beanTableModel = new BeanTableModel(StatistikaTypuKategorie.class, spendingStatistics);
-            beanTableModel.sortColumnNames();
-            JTable jTable = new JTable(beanTableModel);
-            jScrollPane.getViewport().add(jTable);
-            JOptionPane.showMessageDialog(null, jScrollPane);
+                @Override
+                protected void done() {
+                    try {
+                        List data = get();
+                        showJTable(StatistikaTypuKategorie.class, data);
+                    } catch (InterruptedException | ExecutionException ex) {
+                        Logger.getLogger(MainGui.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+
+                @Override
+                protected void process(List<RuntimeException> chunks) {
+                    if (chunks.size() > 0) {
+                        showException("Chyba", chunks.get(0));
+                    }
+                }
+
+            }.execute();
         }
     }//GEN-LAST:event_typeAndCatMenuItemActionPerformed
 
@@ -277,30 +386,71 @@ public class MainGui extends javax.swing.JFrame {
         final StatistikaSpotriebParams params = new StatistikaSpotriebParams();
         int option = showUniversalInputDialog(params, "Štatistika podľa typu a kategórie");
         if (option == JOptionPane.OK_OPTION) {
-            List<CelkovaStatistika> overalStatistics = SeHistoriaService.getInstance().getOveralStatistics(params);
-            JScrollPane jScrollPane = new JScrollPane();
-            Dimension dimension = new Dimension(1200, 400);
-            jScrollPane.setSize(dimension);
-            jScrollPane.setPreferredSize(dimension);
-            final BeanTableModel beanTableModel = new BeanTableModel(CelkovaStatistika.class, overalStatistics);
-            beanTableModel.sortColumnNames();
-            JTable jTable = new JTable(beanTableModel);
-            jScrollPane.getViewport().add(jTable);
-            JOptionPane.showMessageDialog(null, jScrollPane);
+            new SwingWorker<List, RuntimeException>() {
+                @Override
+                protected List doInBackground() throws Exception {
+                    try {
+                        return SeHistoriaService.getInstance().getOveralStatistics(params);
+                    } catch (RuntimeException e) {
+                        publish(e);
+                        return null;
+                    }
+                }
+
+                @Override
+                protected void done() {
+                    try {
+                        List data = get();
+                        showJTable(CelkovaStatistika.class, data);
+                    } catch (InterruptedException | ExecutionException ex) {
+                        Logger.getLogger(MainGui.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+
+                @Override
+                protected void process(List<RuntimeException> chunks) {
+                    if (chunks.size() > 0) {
+                        showException("Chyba", chunks.get(0));
+                    }
+                }
+
+            }.execute();
         }
     }//GEN-LAST:event_jMenuItem3ActionPerformed
 
     private void jMenuItem4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem4ActionPerformed
         final NajminajucejsiSpotrebiteliaParams params = new NajminajucejsiSpotrebiteliaParams();
-        int option = showUniversalInputDialog(params, "10% spotrebiteľou s najväčšou spotrebou");
+        int option = showUniversalInputDialog(params, "10% spotrebiteľov s najväčšou spotrebou");
         if (option == JOptionPane.OK_OPTION) {
-            List<NajminajucejsiSpotrebitel> overalStatistics = SeHistoriaService.getInstance().getNajnminajucejsiSpotrebitelia(params);
-            JScrollPane jScrollPane = new JScrollPane();
-            final BeanTableModel beanTableModel = new BeanTableModel(NajminajucejsiSpotrebitel.class, overalStatistics);
-            beanTableModel.sortColumnNames();
-            JTable jTable = new JTable(beanTableModel);
-            jScrollPane.getViewport().add(jTable);
-            JOptionPane.showMessageDialog(null, jScrollPane);
+            new SwingWorker<List, RuntimeException>() {
+                @Override
+                protected List doInBackground() throws Exception {
+                    try {
+                        return SeHistoriaService.getInstance().getNajnminajucejsiSpotrebitelia(params);
+                    } catch (RuntimeException e) {
+                        publish(e);
+                        return null;
+                    }
+                }
+
+                @Override
+                protected void done() {
+                    try {
+                        List data = get();
+                        showJTable(NajminajucejsiSpotrebitel.class, data);
+                    } catch (InterruptedException | ExecutionException ex) {
+                        Logger.getLogger(MainGui.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+
+                @Override
+                protected void process(List<RuntimeException> chunks) {
+                    if (chunks.size() > 0) {
+                        showException("Chyba", chunks.get(0));
+                    }
+                }
+
+            }.execute();
         }
     }//GEN-LAST:event_jMenuItem4ActionPerformed
 
@@ -308,15 +458,101 @@ public class MainGui extends javax.swing.JFrame {
         final ZamestnanecRegionParams params = new ZamestnanecRegionParams();
         int option = showUniversalInputDialog(params, "Zamestnanci v regióne");
         if (option == JOptionPane.OK_OPTION) {
-            List<SeZamestnanecInfo> zams = SeZamestnanecService.getInstance().findInRegion(params);
-            JScrollPane jScrollPane = new JScrollPane();
-            final BeanTableModel beanTableModel = new BeanTableModel(SeZamestnanecInfo.class, zams);
-            beanTableModel.sortColumnNames();
-            JTable jTable = new JTable(beanTableModel);
-            jScrollPane.getViewport().add(jTable);
-            JOptionPane.showMessageDialog(null, jScrollPane);
+            new SwingWorker<List, RuntimeException>() {
+                @Override
+                protected List doInBackground() throws Exception {
+                    try {
+                        return SeZamestnanecService.getInstance().findInRegion(params);
+                    } catch (RuntimeException e) {
+                        publish(e);
+                        return null;
+                    }
+                }
+
+                @Override
+                protected void done() {
+                    try {
+                        List data = get();
+                        showJTable(SeZamestnanecInfo.class, data);
+                    } catch (InterruptedException | ExecutionException ex) {
+                        Logger.getLogger(MainGui.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+
+                @Override
+                protected void process(List<RuntimeException> chunks) {
+                    if (chunks.size() > 0) {
+                        showException("Chyba", chunks.get(0));
+                    }
+                }
+
+            }.execute();
         }
     }//GEN-LAST:event_jMenuItem5ActionPerformed
+
+    private void jMenuItem6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem6ActionPerformed
+        new SwingWorker<List, RuntimeException>() {
+            @Override
+            protected List doInBackground() throws Exception {
+                try {
+                    return SeZamestnanecService.getInstance().findBest(3);
+                } catch (RuntimeException e) {
+                    publish(e);
+                    return null;
+                }
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    List data = get();
+                    showJTable(ZamestnanecOdpisReport.class, data);
+                } catch (InterruptedException | ExecutionException ex) {
+                    Logger.getLogger(MainGui.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+
+            @Override
+            protected void process(List<RuntimeException> chunks) {
+                if (chunks.size() > 0) {
+                    showException("Chyba", chunks.get(0));
+                }
+            }
+
+        }.execute();
+    }//GEN-LAST:event_jMenuItem6ActionPerformed
+
+    private void jMenuItem7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem7ActionPerformed
+        new SwingWorker<List, RuntimeException>() {
+            @Override
+            protected List doInBackground() throws Exception {
+                try {
+                    return SeHistoriaService.getInstance().getProblematickeDOmacnosti();
+                } catch (RuntimeException e) {
+                    publish(e);
+                    return null;
+                }
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    List data = get();
+                    showJTable(SpotrebaDomacnosti.class, data);
+                } catch (InterruptedException | ExecutionException ex) {
+                    Logger.getLogger(MainGui.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+
+            @Override
+            protected void process(List<RuntimeException> chunks) {
+                if (chunks.size() > 0) {
+                    showException("Chyba", chunks.get(0));
+                }
+            }
+
+        }.execute();
+    }//GEN-LAST:event_jMenuItem7ActionPerformed
 
     private void showLastYearChange(double factor) throws HeadlessException {
         final IncreasedSpendingStatisticParams params = new IncreasedSpendingStatisticParams();
@@ -325,18 +561,35 @@ public class MainGui extends javax.swing.JFrame {
         cal.add(Calendar.MONTH, -1);
         Date result = cal.getTime();
         params.setDatumOd(result);
+        new SwingWorker<List, RuntimeException>() {
+            @Override
+            protected List doInBackground() throws Exception {
+                try {
+                    return SeHistoriaService.getInstance().getIncreasedSpendingStatistics(params, factor);
+                } catch (RuntimeException e) {
+                    publish(e);
+                    return null;
+                }
+            }
 
-        List<ZvysenieSpotreby> spendingStatistics = SeHistoriaService.getInstance().getIncreasedSpendingStatistics(params, factor);
+            @Override
+            protected void done() {
+                try {
+                    List data = get();
+                    showJTable(ZvysenieSpotreby.class, data);
+                } catch (InterruptedException | ExecutionException ex) {
+                    Logger.getLogger(MainGui.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
 
-        JScrollPane jScrollPane = new JScrollPane();
-        Dimension dimension = new Dimension(1200, 400);
-        jScrollPane.setSize(dimension);
-        jScrollPane.setPreferredSize(dimension);
-        final BeanTableModel beanTableModel = new BeanTableModel(ZvysenieSpotreby.class, spendingStatistics);
-        beanTableModel.sortColumnNames();
-        JTable jTable = new JTable(beanTableModel);
-        jScrollPane.getViewport().add(jTable);
-        JOptionPane.showMessageDialog(null, jScrollPane);
+            @Override
+            protected void process(List<RuntimeException> chunks) {
+                if (chunks.size() > 0) {
+                    showException("Chyba", chunks.get(0));
+                }
+            }
+
+        }.execute();
     }
 
     private int showUniversalInputDialog(final Object params, String title) throws HeadlessException {
@@ -385,6 +638,22 @@ public class MainGui extends javax.swing.JFrame {
         });
     }
 
+    private void showException(String message, Exception e) {
+        JOptionPane.showMessageDialog(null, e.getMessage(), message, JOptionPane.ERROR_MESSAGE);
+    }
+
+    private void showJTable(Class clazz, List data) throws HeadlessException {
+        JScrollPane jScrollPane = new JScrollPane();
+        Dimension dimension = new Dimension(1200, 400);
+        jScrollPane.setSize(dimension);
+        jScrollPane.setPreferredSize(dimension);
+        final BeanTableModel beanTableModel = new BeanTableModel(clazz, data);
+        beanTableModel.sortColumnNames();
+        JTable jTable = new JTable(beanTableModel);
+        jScrollPane.getViewport().add(jTable);
+        JOptionPane.showMessageDialog(null, jScrollPane);
+    }
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem increasedSpending;
     private javax.swing.JMenu jMenu1;
@@ -393,6 +662,8 @@ public class MainGui extends javax.swing.JFrame {
     private javax.swing.JMenuItem jMenuItem3;
     private javax.swing.JMenuItem jMenuItem4;
     private javax.swing.JMenuItem jMenuItem5;
+    private javax.swing.JMenuItem jMenuItem6;
+    private javax.swing.JMenuItem jMenuItem7;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JMenu servisMenu;
     private javax.swing.JMenuItem servisStatsMenuItem;
