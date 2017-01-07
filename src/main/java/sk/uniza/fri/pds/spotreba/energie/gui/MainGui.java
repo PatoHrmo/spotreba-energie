@@ -40,6 +40,7 @@ import sk.uniza.fri.pds.spotreba.energie.service.NajminajucejsiSpotrebitel;
 import sk.uniza.fri.pds.spotreba.energie.service.SeHistoriaService;
 import sk.uniza.fri.pds.spotreba.energie.service.SeServisService;
 import sk.uniza.fri.pds.spotreba.energie.service.SeZamestnanecService;
+import sk.uniza.fri.pds.spotreba.energie.service.ZamestnanecOdpisReport;
 import sk.uniza.fri.pds.spotreba.energie.service.util.IncreasedSpendingStatisticParams;
 import sk.uniza.fri.pds.spotreba.energie.service.util.NajminajucejsiSpotrebiteliaParams;
 import sk.uniza.fri.pds.spotreba.energie.service.util.SpendingStatisticsParameters;
@@ -87,6 +88,7 @@ public class MainGui extends javax.swing.JFrame {
         servisStatsMenuItem = new javax.swing.JMenuItem();
         jMenu1 = new javax.swing.JMenu();
         jMenuItem5 = new javax.swing.JMenuItem();
+        jMenuItem6 = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -175,6 +177,14 @@ public class MainGui extends javax.swing.JFrame {
             }
         });
         jMenu1.add(jMenuItem5);
+
+        jMenuItem6.setText("Zobraziť najvýkonnejších 3 zamestnancov za posledný rok");
+        jMenuItem6.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem6ActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jMenuItem6);
 
         menuBar.add(jMenu1);
 
@@ -318,6 +328,19 @@ public class MainGui extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jMenuItem5ActionPerformed
 
+    private void jMenuItem6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem6ActionPerformed
+        List<ZamestnanecOdpisReport> best = SeZamestnanecService.getInstance().findBest(3);
+        JScrollPane jScrollPane = new JScrollPane();
+        Dimension dimension = new Dimension(1200, 400);
+        jScrollPane.setSize(dimension);
+        jScrollPane.setPreferredSize(dimension);
+        final BeanTableModel beanTableModel = new BeanTableModel(ZamestnanecOdpisReport.class, best);
+        beanTableModel.sortColumnNames();
+        JTable jTable = new JTable(beanTableModel);
+        jScrollPane.getViewport().add(jTable);
+        JOptionPane.showMessageDialog(null, jScrollPane);
+    }//GEN-LAST:event_jMenuItem6ActionPerformed
+
     private void showLastYearChange(double factor) throws HeadlessException {
         final IncreasedSpendingStatisticParams params = new IncreasedSpendingStatisticParams();
         params.setDatumDo(new Date());
@@ -393,6 +416,7 @@ public class MainGui extends javax.swing.JFrame {
     private javax.swing.JMenuItem jMenuItem3;
     private javax.swing.JMenuItem jMenuItem4;
     private javax.swing.JMenuItem jMenuItem5;
+    private javax.swing.JMenuItem jMenuItem6;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JMenu servisMenu;
     private javax.swing.JMenuItem servisStatsMenuItem;

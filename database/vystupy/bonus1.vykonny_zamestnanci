@@ -1,5 +1,5 @@
 select * from(
-select meno, priezvisko, COUNT(*) pocet_odpisov, rank() over (order by count(*) desc)  pozicia
+select id_zamestnanca, meno, priezvisko, COUNT(*) pocet_odpisov, rank() over (order by count(*) desc)  pozicia
 from SE_OSOBA join SE_ZAMESTNANEC using(rod_cislo) join SE_ODPIS using (id_zamestnanca)
 where trunc(datum_odpisu,'YEAR') = add_months(trunc(sysdate,'YEAR'),-12)
-group by meno,priezvisko, id_zamestnanca) where pozicia<4
+group by meno,priezvisko, id_zamestnanca) where pozicia<=3 ORDER BY pozicia;
