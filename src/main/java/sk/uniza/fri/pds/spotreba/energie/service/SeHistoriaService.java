@@ -18,6 +18,7 @@ import sk.uniza.fri.pds.spotreba.energie.OracleJDBCConnector;
 import sk.uniza.fri.pds.spotreba.energie.domain.CelkovaStatistika;
 import sk.uniza.fri.pds.spotreba.energie.domain.KrokSpotreby;
 import sk.uniza.fri.pds.spotreba.energie.domain.SeHistoria;
+import sk.uniza.fri.pds.spotreba.energie.domain.SpotrebaDomacnosti;
 import sk.uniza.fri.pds.spotreba.energie.domain.StatistikaTypuKategorie;
 import sk.uniza.fri.pds.spotreba.energie.domain.ZvysenieSpotreby;
 import sk.uniza.fri.pds.spotreba.energie.domain.util.MeraciaVelicina;
@@ -202,6 +203,30 @@ public class SeHistoriaService implements SeService<SeHistoria> {
                 NajminajucejsiSpotrebitel o = new NajminajucejsiSpotrebitel();
                 o.setMeno(result.getString("meno"));
                 o.setCisloOdberatela(result.getInt("cislo_odberatela"));
+                output.add(o);
+            }
+            return output;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<SpotrebaDomacnosti> getProblematickeDOmacnosti() {
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("select cislo_odberatela, meno||' '||priezvisko meno, meracia_velicina, get_spotreba_za_obdobie(cislo_odberatela,ADD_MONTHS(sysdate,-12),sysdate,meracia_velicina) spotreba, get_pocet_vymen_zariadenia(cislo_odberatela,ADD_MONTHS(sysdate,-12),sysdate,zariadenie.MERACIA_VELICINA) as pocet_vymen\n"
+                    + "from SE_OSOBA join SE_ODBERATEL odberatel on(odberatel.rod_cislo = SE_OSOBA.ROD_CISLO) join SE_HISTORIA using (cislo_odberatela) \n"
+                    + "join SE_ZARIADENIE using(cis_zariadenia) join SE_TYP_ZARIADENIA zariadenie on(zariadenie.typ = SE_ZARIADENIE.TYP)\n"
+                    + "where get_pocet_vymen_zariadenia(cislo_odberatela,ADD_MONTHS(sysdate,-12),sysdate,zariadenie.MERACIA_VELICINA)>2\n"
+                    + "group by cislo_odberatela, SE_OSOBA.rod_cislo, meno, priezvisko,meracia_velicina, get_spotreba_za_obdobie(cislo_odberatela,ADD_MONTHS(sysdate,-12),sysdate,meracia_velicina)");
+            ResultSet result = stmnt.executeQuery();
+            List<SpotrebaDomacnosti> output = new LinkedList<>();
+            while (result.next()) {
+                SpotrebaDomacnosti o = new SpotrebaDomacnosti();
+                o.setMeno(result.getString("meno"));
+                o.setCisloOdberatela(result.getInt("cislo_odberatela"));
+                o.setVelicina(MeraciaVelicina.valueOf(result.getString("MERACIA_VELICINA").toUpperCase()));
+                o.setSpotreba(result.getDouble("SPOTREBA"));
+                o.setPocetVymen(result.getInt("POCET_VYMEN"));
                 output.add(o);
             }
             return output;
