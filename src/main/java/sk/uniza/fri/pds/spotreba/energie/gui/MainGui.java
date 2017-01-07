@@ -12,9 +12,13 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.SwingWorker;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -207,34 +211,61 @@ public class MainGui extends javax.swing.JFrame {
         final SpendingStatisticsParameters params = new SpendingStatisticsParameters();
         int option = showUniversalInputDialog(params, "Vývoj spotreby");
         if (option == JOptionPane.OK_OPTION) {
-            List<KrokSpotreby> spendingStatistics = SeHistoriaService.getInstance().getSpendingStatistics(params);
-            final TimeSeries series = new TimeSeries("");
+            new SwingWorker<List, RuntimeException>() {
+                @Override
+                protected List doInBackground() throws Exception {
+                    try {
+                        return SeHistoriaService.getInstance().getSpendingStatistics(params);
+                    } catch (RuntimeException e) {
+                        publish(e);
+                        return null;
+                    }
+                }
 
-            final String title = "Vývoj spotreby";
-            for (KrokSpotreby krok : spendingStatistics) {
-                series.add(new Month(krok.getDatumOd()), krok.getSpotreba());
-            }
-            final IntervalXYDataset dataset = (IntervalXYDataset) new TimeSeriesCollection(series);
-            JFreeChart chart = ChartFactory.createXYBarChart(
-                    title, // title
-                    "", // x-axis label
-                    true, // date axis?
-                    "", // y-axis label
-                    dataset, // data
-                    PlotOrientation.VERTICAL, // orientation
-                    false, // create legend?
-                    true, // generate tooltips?
-                    false // generate URLs?
-            );
+                @Override
+                protected void done() {
+                    try {
+                        List<KrokSpotreby> spendingStatistics = get();
+                        if (spendingStatistics != null) {
+                            final TimeSeries series = new TimeSeries("");
+                            final String title = "Vývoj spotreby";
+                            for (KrokSpotreby krok : spendingStatistics) {
+                                series.add(new Month(krok.getDatumOd()), krok.getSpotreba());
+                            }
+                            final IntervalXYDataset dataset = (IntervalXYDataset) new TimeSeriesCollection(series);
+                            JFreeChart chart = ChartFactory.createXYBarChart(
+                                    title, // title
+                                    "", // x-axis label
+                                    true, // date axis?
+                                    "", // y-axis label
+                                    dataset, // data
+                                    PlotOrientation.VERTICAL, // orientation
+                                    false, // create legend?
+                                    true, // generate tooltips?
+                                    false // generate URLs?
+                            );
 
-            // Set date axis style
-            DateAxis axis = (DateAxis) ((XYPlot) chart.getPlot()).getDomainAxis();
-            axis.setDateFormatOverride(new SimpleDateFormat("yyyy"));
-            DateFormat formatter = new SimpleDateFormat("yyyy");
-            DateTickUnit unit = new DateTickUnit(DateTickUnitType.YEAR, 1, formatter);
-            axis.setTickUnit(unit);
+                            // Set date axis style
+                            DateAxis axis = (DateAxis) ((XYPlot) chart.getPlot()).getDomainAxis();
+                            axis.setDateFormatOverride(new SimpleDateFormat("yyyy"));
+                            DateFormat formatter = new SimpleDateFormat("yyyy");
+                            DateTickUnit unit = new DateTickUnit(DateTickUnitType.YEAR, 1, formatter);
+                            axis.setTickUnit(unit);
+                            JOptionPane.showMessageDialog(null, new ChartPanel(chart));
+                        }
+                    } catch (InterruptedException | ExecutionException ex) {
+                        Logger.getLogger(MainGui.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
 
-            JOptionPane.showMessageDialog(null, new ChartPanel(chart));
+                @Override
+                protected void process(List<RuntimeException> chunks) {
+                    if (chunks.size() > 0) {
+                        showException("Chyba", chunks.get(0));
+                    }
+                }
+
+            }.execute();
         }
     }//GEN-LAST:event_showSpendingStatisticsActionPerformed
 
@@ -429,6 +460,10 @@ public class MainGui extends javax.swing.JFrame {
                 new MainGui().setVisible(true);
             }
         });
+    }
+
+    private void showException(String message, Exception e) {
+        JOptionPane.showMessageDialog(null, e.getMessage(), message, JOptionPane.ERROR_MESSAGE);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
