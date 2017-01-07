@@ -21,6 +21,8 @@ import javax.imageio.ImageIO;
 import javax.imageio.stream.ImageInputStream;
 import sk.uniza.fri.pds.spotreba.energie.OracleJDBCConnector;
 import sk.uniza.fri.pds.spotreba.energie.domain.SeZamestnanec;
+import sk.uniza.fri.pds.spotreba.energie.domain.SeZamestnanecInfo;
+import sk.uniza.fri.pds.spotreba.energie.service.util.ZamestnanecRegionParams;
 
 public class SeZamestnanecService implements SeService<SeZamestnanec> {
 
@@ -67,23 +69,72 @@ public class SeZamestnanecService implements SeService<SeZamestnanec> {
             ResultSet result = stmnt.executeQuery();
             List<SeZamestnanec> output = new LinkedList<>();
             while (result.next()) {
-                SeZamestnanec o = new SeZamestnanec();
-                o.setIdZamestnanca(result.getInt("ID_ZAMESTNANCA"));
-                o.setIdRegionu(result.getInt("ID_REGIONU"));
-                o.setRodCislo(result.getString("ROD_CISLO"));
-                Blob blob = result.getBlob("FOTO");
-                if (blob != null) {
-                    ImageInputStream is = ImageIO.createImageInputStream(blob.getBinaryStream());
-                    BufferedImage image = ImageIO.read(is);
-                    o.setFoto(image);
-
-                }
+                SeZamestnanec o = parseOneFromResult(result);
                 output.add(o);
             }
             return output;
         } catch (SQLException | IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public List<SeZamestnanecInfo> findInRegion(ZamestnanecRegionParams params) {
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("select id_zamestnanca, meno, priezvisko from SE_OSOBA join SE_ZAMESTNANEC using(rod_cislo)\n"
+                    + "where id_regionu = ?");
+            stmnt.setInt(1, params.getIdRegionu());
+            ResultSet result = stmnt.executeQuery();
+            List<SeZamestnanecInfo> output = new LinkedList<>();
+            while (result.next()) {
+                SeZamestnanecInfo o = new SeZamestnanecInfo();
+                o.setIdZamestnanca(result.getInt("ID_ZAMESTNANCA"));
+                o.setMeno(result.getString("meno"));
+                o.setPriezvisko(result.getString("PRIEZVISKO"));
+                output.add(o);
+            }
+            return output;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<ZamestnanecOdpisReport> findBest(int count) {
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("select * from(\n"
+                    + "select id_zamestnanca, meno, priezvisko, COUNT(*) pocet_odpisov, rank() over (order by count(*) desc)  pozicia\n"
+                    + "from SE_OSOBA join SE_ZAMESTNANEC using(rod_cislo) join SE_ODPIS using (id_zamestnanca)\n"
+                    + "where trunc(datum_odpisu,'YEAR') = add_months(trunc(sysdate,'YEAR'),-12)\n"
+                    + "group by meno,priezvisko, id_zamestnanca) where pozicia<=? ORDER BY pozicia");
+            stmnt.setInt(1, count);
+            ResultSet result = stmnt.executeQuery();
+            List<ZamestnanecOdpisReport> output = new LinkedList<>();
+            while (result.next()) {
+                ZamestnanecOdpisReport o = new ZamestnanecOdpisReport();
+                o.setIdZamestnanca(result.getInt("ID_ZAMESTNANCA"));
+                o.setMeno(result.getString("meno"));
+                o.setPriezvisko(result.getString("PRIEZVISKO"));
+                o.setPocetOdpisov(result.getInt("POCET_ODPISOV"));
+                output.add(o);
+            }
+            return output;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private SeZamestnanec parseOneFromResult(ResultSet result) throws SQLException, IOException {
+        SeZamestnanec o = new SeZamestnanec();
+        o.setIdZamestnanca(result.getInt("ID_ZAMESTNANCA"));
+        o.setIdRegionu(result.getInt("ID_REGIONU"));
+        o.setRodCislo(result.getString("ROD_CISLO"));
+        Blob blob = result.getBlob("FOTO");
+        if (blob != null) {
+            ImageInputStream is = ImageIO.createImageInputStream(blob.getBinaryStream());
+            BufferedImage image = ImageIO.read(is);
+            o.setFoto(image);
+
+        }
+        return o;
     }
 
     @Override

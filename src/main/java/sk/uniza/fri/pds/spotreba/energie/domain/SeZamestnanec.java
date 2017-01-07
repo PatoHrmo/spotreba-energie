@@ -8,8 +8,8 @@ package sk.uniza.fri.pds.spotreba.energie.domain;
 import java.awt.image.BufferedImage;
 import java.io.Serializable;
 import org.metawidget.inspector.annotation.UiHidden;
-import sk.uniza.fri.pds.spotreba.energie.gui.DisplayPriority;
-import sk.uniza.fri.pds.spotreba.energie.gui.TableHidden;
+import sk.uniza.fri.pds.spotreba.energie.gui.utils.DisplayPriority;
+import sk.uniza.fri.pds.spotreba.energie.gui.utils.TableHidden;
 
 public class SeZamestnanec implements Serializable {
 

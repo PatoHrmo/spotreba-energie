@@ -7,14 +7,14 @@ package sk.uniza.fri.pds.spotreba.energie.domain;
 
 import java.io.Serializable;
 import org.metawidget.inspector.annotation.UiHidden;
-import sk.uniza.fri.pds.spotreba.energie.gui.DisplayPriority;
+import sk.uniza.fri.pds.spotreba.energie.gui.utils.DisplayPriority;
 
 public class SeOdberatel implements Serializable {
 
     private static final long serialVersionUID = 1L;
     private int cisloOdberatela;
-    private Character typ;
-    private Character kategoria;
+    private TypOdberatela typ;
+    private KategoriaOdberatela kategoria;
     private String ico;
     private String rodCislo;
 
@@ -24,11 +24,11 @@ public class SeOdberatel implements Serializable {
         return cisloOdberatela;
     }
 
-    public Character getTyp() {
+    public TypOdberatela getTyp() {
         return typ;
     }
 
-    public Character getKategoria() {
+    public KategoriaOdberatela getKategoria() {
         return kategoria;
     }
 
@@ -44,11 +44,11 @@ public class SeOdberatel implements Serializable {
         this.cisloOdberatela = cisloOdberatela;
     }
 
-    public void setTyp(Character typ) {
+    public void setTyp(TypOdberatela typ) {
         this.typ = typ;
     }
 
-    public void setKategoria(Character kategoria) {
+    public void setKategoria(KategoriaOdberatela kategoria) {
         this.kategoria = kategoria;
     }
 
@@ -58,6 +58,28 @@ public class SeOdberatel implements Serializable {
 
     public void setRodCislo(String rodCislo) {
         this.rodCislo = rodCislo;
+    }
+
+    public enum TypOdberatela {
+        DOMACNOST('D'), FIRMA('F');
+
+        public final Character val;
+
+        private TypOdberatela(char val) {
+            this.val = val;
+        }
+
+        public static TypOdberatela getByValue(char val) {
+            if (Character.toUpperCase(val) == 'D') {
+                return DOMACNOST;
+            }
+            return FIRMA;
+        }
+
+    }
+
+    public enum KategoriaOdberatela {
+        A, B, C
     }
 
 }

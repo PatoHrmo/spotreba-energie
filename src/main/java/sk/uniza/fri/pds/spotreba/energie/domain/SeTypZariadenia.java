@@ -7,13 +7,14 @@ package sk.uniza.fri.pds.spotreba.energie.domain;
 
 import java.io.Serializable;
 import org.metawidget.inspector.annotation.UiHidden;
-import sk.uniza.fri.pds.spotreba.energie.gui.DisplayPriority;
+import sk.uniza.fri.pds.spotreba.energie.domain.util.MeraciaVelicina;
+import sk.uniza.fri.pds.spotreba.energie.gui.utils.DisplayPriority;
 
 public class SeTypZariadenia implements Serializable {
 
     private static final long serialVersionUID = 1L;
     private int typ;
-    private String meraciaVelicina;
+    private MeraciaVelicina meraciaVelicina;
     private int cisloModelu;
     private String vyrobca;
 
@@ -27,11 +28,11 @@ public class SeTypZariadenia implements Serializable {
         this.typ = typ;
     }
 
-    public String getMeraciaVelicina() {
+    public MeraciaVelicina getMeraciaVelicina() {
         return meraciaVelicina;
     }
 
-    public void setMeraciaVelicina(String meraciaVelicina) {
+    public void setMeraciaVelicina(MeraciaVelicina meraciaVelicina) {
         this.meraciaVelicina = meraciaVelicina;
     }
 

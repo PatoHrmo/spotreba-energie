@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package sk.uniza.fri.pds.spotreba.energie.gui;
+package sk.uniza.fri.pds.spotreba.energie.gui.utils;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface DisplayPriority {
+public @interface TableCollumnName {
 
-    public int priority();
+    public String name();
 }

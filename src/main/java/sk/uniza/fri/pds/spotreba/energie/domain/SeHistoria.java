@@ -7,6 +7,7 @@ package sk.uniza.fri.pds.spotreba.energie.domain;
 
 import java.io.Serializable;
 import java.util.Date;
+import sk.uniza.fri.pds.spotreba.energie.gui.utils.TableHidden;
 
 public class SeHistoria implements Serializable {
 
@@ -15,6 +16,8 @@ public class SeHistoria implements Serializable {
     private int cisZariadenia;
     private Date datumInstalacie;
     private Date datumOdobratia;
+    private int zamestnanecVykonvajuciZmenu;
+    private int spotrebaPredOdobratim;
 
     public int getCisloOdberatela() {
         return cisloOdberatela;
@@ -46,6 +49,24 @@ public class SeHistoria implements Serializable {
 
     public void setDatumOdobratia(Date datumOdobratia) {
         this.datumOdobratia = datumOdobratia;
+    }
+
+    @TableHidden
+    public int getZamestnanecVykonvajuciZmenu() {
+        return zamestnanecVykonvajuciZmenu;
+    }
+
+    public void setZamestnanecVykonvajuciZmenu(int zamestnanecVykonvajuciZmenu) {
+        this.zamestnanecVykonvajuciZmenu = zamestnanecVykonvajuciZmenu;
+    }
+
+    @TableHidden
+    public int getSpotrebaPredOdobratim() {
+        return spotrebaPredOdobratim;
+    }
+
+    public void setSpotrebaPredOdobratim(int spotrebaPredOdobratim) {
+        this.spotrebaPredOdobratim = spotrebaPredOdobratim;
     }
 
 }
