@@ -5,8 +5,14 @@
  */
 package sk.uniza.fri.pds.spotreba.energie.service;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Reader;
 import java.math.BigDecimal;
 import java.sql.CallableStatement;
+import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -14,6 +20,7 @@ import java.sql.Struct;
 import java.sql.Timestamp;
 import java.util.LinkedList;
 import java.util.List;
+import org.apache.commons.io.IOUtils;
 import sk.uniza.fri.pds.spotreba.energie.OracleJDBCConnector;
 import sk.uniza.fri.pds.spotreba.energie.domain.CelkovaStatistika;
 import sk.uniza.fri.pds.spotreba.energie.domain.KrokSpotreby;
@@ -24,6 +31,7 @@ import sk.uniza.fri.pds.spotreba.energie.domain.ZvysenieSpotreby;
 import sk.uniza.fri.pds.spotreba.energie.domain.util.MeraciaVelicina;
 import sk.uniza.fri.pds.spotreba.energie.service.util.IncreasedSpendingStatisticParams;
 import sk.uniza.fri.pds.spotreba.energie.service.util.NajminajucejsiSpotrebiteliaParams;
+import sk.uniza.fri.pds.spotreba.energie.service.util.ReportParams;
 import sk.uniza.fri.pds.spotreba.energie.service.util.SpendingStatisticsParameters;
 import sk.uniza.fri.pds.spotreba.energie.service.util.StatistikaSpotriebParams;
 import sk.uniza.fri.pds.spotreba.energie.service.util.StatistikaTypuKategorieParams;
@@ -231,6 +239,31 @@ public class SeHistoriaService implements SeService<SeHistoria> {
             }
             return output;
         } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<String> createLastYearReport(ReportParams params) {
+        try (Connection connection = OracleJDBCConnector.getConnection();) {
+            CallableStatement stmnt = connection.prepareCall("select get_xml_odberatela(?) as xml from dual");
+            stmnt.setInt(1, params.getIdOdberatela());
+            ResultSet result = stmnt.executeQuery();
+
+            List<String> output = new LinkedList<>();
+            while (result.next()) {
+                Clob clob = result.getClob("XML");
+                Reader reader = clob.getCharacterStream();
+                String o = IOUtils.toString(reader);
+                output.add(o);
+                File subor = params.getSubor();
+                if (subor != null) {
+                    try (BufferedWriter w = new BufferedWriter(new FileWriter(subor))) {
+                        IOUtils.write(o, w);
+                    }
+                }
+            }
+            return output;
+        } catch (SQLException | IOException e) {
             throw new RuntimeException(e);
         }
     }

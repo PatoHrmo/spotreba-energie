@@ -48,6 +48,7 @@ import sk.uniza.fri.pds.spotreba.energie.service.SeZamestnanecService;
 import sk.uniza.fri.pds.spotreba.energie.service.ZamestnanecOdpisReport;
 import sk.uniza.fri.pds.spotreba.energie.service.util.IncreasedSpendingStatisticParams;
 import sk.uniza.fri.pds.spotreba.energie.service.util.NajminajucejsiSpotrebiteliaParams;
+import sk.uniza.fri.pds.spotreba.energie.service.util.ReportParams;
 import sk.uniza.fri.pds.spotreba.energie.service.util.SpendingStatisticsParameters;
 import sk.uniza.fri.pds.spotreba.energie.service.util.StatistikaSpotriebParams;
 import sk.uniza.fri.pds.spotreba.energie.service.util.StatistikaTypuKategorieParams;
@@ -89,6 +90,7 @@ public class MainGui extends javax.swing.JFrame {
         typeAndCatMenuItem = new javax.swing.JMenuItem();
         jMenuItem4 = new javax.swing.JMenuItem();
         jMenuItem3 = new javax.swing.JMenuItem();
+        jMenuItem8 = new javax.swing.JMenuItem();
         servisMenu = new javax.swing.JMenu();
         servisStatsMenuItem = new javax.swing.JMenuItem();
         jMenuItem7 = new javax.swing.JMenuItem();
@@ -159,6 +161,14 @@ public class MainGui extends javax.swing.JFrame {
             }
         });
         spendingMenu.add(jMenuItem3);
+
+        jMenuItem8.setText("Vytvoriť ročný report pre spotrebiteľa ");
+        jMenuItem8.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem8ActionPerformed(evt);
+            }
+        });
+        spendingMenu.add(jMenuItem8);
 
         menuBar.add(spendingMenu);
 
@@ -554,6 +564,44 @@ public class MainGui extends javax.swing.JFrame {
         }.execute();
     }//GEN-LAST:event_jMenuItem7ActionPerformed
 
+    private void jMenuItem8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem8ActionPerformed
+        final ReportParams params = new ReportParams();
+        int option = showUniversalInputDialog(params, "Ročná správa pre zákazníka", new Dimension(400, 80));
+        if (option == JOptionPane.OK_OPTION) {
+            new SwingWorker<List, RuntimeException>() {
+                @Override
+                protected List doInBackground() throws Exception {
+                    try {
+                        return SeHistoriaService.getInstance().createLastYearReport(params);
+                    } catch (RuntimeException e) {
+                        publish(e);
+                        return null;
+                    }
+                }
+
+                @Override
+                protected void done() {
+                    try {
+                        List<String> data = get();
+                        if (data != null) {
+                            JOptionPane.showMessageDialog(null, "Export prebehol úspešne");
+                        }
+                    } catch (InterruptedException | ExecutionException ex) {
+                        Logger.getLogger(MainGui.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+
+                @Override
+                protected void process(List<RuntimeException> chunks) {
+                    if (chunks.size() > 0) {
+                        showException("Chyba", chunks.get(0));
+                    }
+                }
+
+            }.execute();
+        }
+    }//GEN-LAST:event_jMenuItem8ActionPerformed
+
     private void showLastYearChange(double factor) throws HeadlessException {
         final IncreasedSpendingStatisticParams params = new IncreasedSpendingStatisticParams();
         params.setDatumDo(new Date());
@@ -593,7 +641,15 @@ public class MainGui extends javax.swing.JFrame {
     }
 
     private int showUniversalInputDialog(final Object params, String title) throws HeadlessException {
+        return showUniversalInputDialog(params, title, null);
+    }
+
+    private int showUniversalInputDialog(final Object params, String title, Dimension d) throws HeadlessException {
         SwingMetawidget metawidget = new SwingMetawidget();
+        if (d != null) {
+            metawidget.setSize(d);
+            metawidget.setPreferredSize(d);
+        }
         MetawidgetUtils.setCommonSettings(metawidget);
         metawidget.setToInspect(params);
         Object[] message = {
@@ -664,6 +720,7 @@ public class MainGui extends javax.swing.JFrame {
     private javax.swing.JMenuItem jMenuItem5;
     private javax.swing.JMenuItem jMenuItem6;
     private javax.swing.JMenuItem jMenuItem7;
+    private javax.swing.JMenuItem jMenuItem8;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JMenu servisMenu;
     private javax.swing.JMenuItem servisStatsMenuItem;
