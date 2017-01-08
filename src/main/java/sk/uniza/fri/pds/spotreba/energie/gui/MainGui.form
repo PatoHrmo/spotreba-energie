@@ -65,7 +65,6 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItem3ActionPerformed"/>
               </Events>
             </MenuItem>
-
             <MenuItem class="javax.swing.JMenuItem" name="jMenuItem8">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Vytvori&#x165; ro&#x10d;n&#xfd; report pre spotrebite&#x13e;a "/>
@@ -74,7 +73,6 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItem8ActionPerformed"/>
               </Events>
             </MenuItem>
-
           </SubComponents>
         </Menu>
         <Menu class="javax.swing.JMenu" name="servisMenu">

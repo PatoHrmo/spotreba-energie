@@ -5,13 +5,11 @@
  */
 package sk.uniza.fri.pds.spotreba.energie.service;
 
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
-
 import java.math.BigDecimal;
 import java.sql.CallableStatement;
 import java.sql.Clob;
@@ -33,9 +31,7 @@ import sk.uniza.fri.pds.spotreba.energie.domain.ZvysenieSpotreby;
 import sk.uniza.fri.pds.spotreba.energie.domain.util.MeraciaVelicina;
 import sk.uniza.fri.pds.spotreba.energie.service.util.IncreasedSpendingStatisticParams;
 import sk.uniza.fri.pds.spotreba.energie.service.util.NajminajucejsiSpotrebiteliaParams;
-
 import sk.uniza.fri.pds.spotreba.energie.service.util.ReportParams;
-
 import sk.uniza.fri.pds.spotreba.energie.service.util.SpendingStatisticsParameters;
 import sk.uniza.fri.pds.spotreba.energie.service.util.StatistikaSpotriebParams;
 import sk.uniza.fri.pds.spotreba.energie.service.util.StatistikaTypuKategorieParams;
@@ -127,7 +123,11 @@ public class SeHistoriaService implements SeService<SeHistoria> {
 
     public List<ZvysenieSpotreby> getIncreasedSpendingStatistics(IncreasedSpendingStatisticParams params, double loadFactor) {
         try (Connection connection = OracleJDBCConnector.getConnection();) {
-            CallableStatement stmnt = connection.prepareCall("SELECT * FROM TABLE(get_zvysena_miera_spotreby(?,?,?))");
+            String fn = "get_zvysena_miera_spotreby";
+            if (loadFactor < 1) {
+                fn = "get_znizena_miera_spotreby";
+            }
+            CallableStatement stmnt = connection.prepareCall("SELECT * FROM TABLE(" + fn + "(?,?,?))");
             stmnt.setDate(1, Utils.utilDateToSqlDate(params.getDatumOd()));
             stmnt.setDate(2, Utils.utilDateToSqlDate(params.getDatumDo()));
             stmnt.setDouble(3, loadFactor);
@@ -247,7 +247,6 @@ public class SeHistoriaService implements SeService<SeHistoria> {
         }
     }
 
-
     public List<String> createLastYearReport(ReportParams params) {
         try (Connection connection = OracleJDBCConnector.getConnection();) {
             CallableStatement stmnt = connection.prepareCall("select get_xml_odberatela(?) as xml from dual");
@@ -272,7 +271,6 @@ public class SeHistoriaService implements SeService<SeHistoria> {
             throw new RuntimeException(e);
         }
     }
-
 
     public static synchronized SeHistoriaService getInstance() {
         if (instance == null) {
