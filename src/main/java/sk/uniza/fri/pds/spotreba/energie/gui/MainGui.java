@@ -608,7 +608,7 @@ public class MainGui extends javax.swing.JFrame {
         final IncreasedSpendingStatisticParams params = new IncreasedSpendingStatisticParams();
         params.setDatumDo(new Date());
         Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.MONTH, -1);
+        cal.add(Calendar.MONTH, -12);
         Date result = cal.getTime();
         params.setDatumOd(result);
         new SwingWorker<List, RuntimeException>() {

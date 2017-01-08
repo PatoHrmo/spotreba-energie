@@ -1,5 +1,5 @@
 --set SERVEROUTPUT ON
---select GET_SPOTREBA_ZA_OBDOBIE(0,to_date('1.8.2000','dd.mm.yyyy'),to_date('1.8.2013','dd.mm.yyyy'),'voda') from dual;
+--select GET_SPOTREBA_ZA_OBDOBIE(0,to_date('1.1.2016','dd.mm.yyyy'),to_date('1.1.2017','dd.mm.yyyy'),'voda') from dual;
 create or replace function get_spotreba_za_obdobie(
     pa_cislo_odberatela SE_ODBERATEL.cislo_odberatela%TYPE,
     datum_od date,
