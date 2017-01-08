@@ -391,7 +391,7 @@ public class MainGui extends javax.swing.JFrame {
     }//GEN-LAST:event_jMenuItem1ActionPerformed
 
     private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
-        showLastYearChange(0.9);
+        showLastYearChange(0.1);
     }//GEN-LAST:event_jMenuItem2ActionPerformed
 
     private void jMenuItem3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem3ActionPerformed
@@ -566,7 +566,6 @@ public class MainGui extends javax.swing.JFrame {
         }.execute();
     }//GEN-LAST:event_jMenuItem7ActionPerformed
 
-
     private void jMenuItem8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem8ActionPerformed
         final ReportParams params = new ReportParams();
         int option = showUniversalInputDialog(params, "Ročná správa pre zákazníka", new Dimension(400, 80));
@@ -604,7 +603,6 @@ public class MainGui extends javax.swing.JFrame {
             }.execute();
         }
     }//GEN-LAST:event_jMenuItem8ActionPerformed
-
 
     private void showLastYearChange(double factor) throws HeadlessException {
         final IncreasedSpendingStatisticParams params = new IncreasedSpendingStatisticParams();
