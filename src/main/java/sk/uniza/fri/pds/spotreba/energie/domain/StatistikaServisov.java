@@ -6,7 +6,9 @@
 package sk.uniza.fri.pds.spotreba.energie.domain;
 
 import sk.uniza.fri.pds.spotreba.energie.gui.utils.DisplayPriority;
+
 import sk.uniza.fri.pds.spotreba.energie.gui.utils.TableCollumnName;
+
 
 public class StatistikaServisov {
 
@@ -26,6 +28,7 @@ public class StatistikaServisov {
     }
 
     @DisplayPriority(priority = 2)
+
     @TableCollumnName(name = "Počet servisov do 5 rokov")
     public int getPocetServisovDo5Rokov() {
         return pocetServisovDo5Rokov;
@@ -34,6 +37,7 @@ public class StatistikaServisov {
     public void setPocetServisovDo5Rokov(int pocetServisovDo5Rokov) {
         this.pocetServisovDo5Rokov = pocetServisovDo5Rokov;
     }
+
 
     @TableCollumnName(name = "Počet servisov (diagnostika)")
     public int getPocetServisovTypu0() {
@@ -44,6 +48,7 @@ public class StatistikaServisov {
         this.pocetServisovTypu0 = pocetServisovTypu0;
     }
 
+
     @TableCollumnName(name = "Počet servisov (oprava)")
     public int getPocetServisovTypu1() {
         return pocetServisouTypu1;
@@ -52,6 +57,7 @@ public class StatistikaServisov {
     public void setPocetServisovTypu1(int pocetServisouTypu1) {
         this.pocetServisouTypu1 = pocetServisouTypu1;
     }
+
 
     @TableCollumnName(name = "Počet servisov (nastavenie)")
     public int getPocetServisovTypu2() {

@@ -71,3 +71,4 @@ target/classes/sk/uniza/fri/pds/spotreba/energie/gui/ImagePanel.form
 database/get_Spotreba_skuska.sql
 database/vystupy/get_Spotreba_skuska.sql
 database/get_Spotreba_skuska.sql
+src/main/java/sk/uniza/fri/pds/spotreba/energie/OracleJDBCConnector.java

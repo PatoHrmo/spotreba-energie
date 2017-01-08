@@ -146,6 +146,7 @@ public class MainGui extends javax.swing.JFrame {
         });
         spendingMenu.add(typeAndCatMenuItem);
 
+
         jMenuItem4.setText("10% spotrebitelov s najväčšou spotrebou");
         jMenuItem4.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -201,6 +202,7 @@ public class MainGui extends javax.swing.JFrame {
             }
         });
         jMenu1.add(jMenuItem5);
+
 
         jMenuItem6.setText("Zobraziť najvýkonnejších 3 zamestnancov za posledný rok");
         jMenuItem6.addActionListener(new java.awt.event.ActionListener() {
@@ -564,6 +566,7 @@ public class MainGui extends javax.swing.JFrame {
         }.execute();
     }//GEN-LAST:event_jMenuItem7ActionPerformed
 
+
     private void jMenuItem8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem8ActionPerformed
         final ReportParams params = new ReportParams();
         int option = showUniversalInputDialog(params, "Ročná správa pre zákazníka", new Dimension(400, 80));
@@ -601,6 +604,7 @@ public class MainGui extends javax.swing.JFrame {
             }.execute();
         }
     }//GEN-LAST:event_jMenuItem8ActionPerformed
+
 
     private void showLastYearChange(double factor) throws HeadlessException {
         final IncreasedSpendingStatisticParams params = new IncreasedSpendingStatisticParams();
@@ -641,6 +645,7 @@ public class MainGui extends javax.swing.JFrame {
     }
 
     private int showUniversalInputDialog(final Object params, String title) throws HeadlessException {
+
         return showUniversalInputDialog(params, title, null);
     }
 
@@ -650,6 +655,7 @@ public class MainGui extends javax.swing.JFrame {
             metawidget.setSize(d);
             metawidget.setPreferredSize(d);
         }
+
         MetawidgetUtils.setCommonSettings(metawidget);
         metawidget.setToInspect(params);
         Object[] message = {
@@ -720,7 +726,9 @@ public class MainGui extends javax.swing.JFrame {
     private javax.swing.JMenuItem jMenuItem5;
     private javax.swing.JMenuItem jMenuItem6;
     private javax.swing.JMenuItem jMenuItem7;
+
     private javax.swing.JMenuItem jMenuItem8;
+
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JMenu servisMenu;
     private javax.swing.JMenuItem servisStatsMenuItem;

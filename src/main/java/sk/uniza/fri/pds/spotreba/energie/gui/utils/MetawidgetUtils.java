@@ -9,7 +9,9 @@ import com.toedter.calendar.JDateChooser;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+
 import java.io.File;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Date;
@@ -28,7 +30,9 @@ import org.metawidget.widgetbuilder.composite.CompositeWidgetBuilder;
 import org.metawidget.widgetbuilder.composite.CompositeWidgetBuilderConfig;
 import org.metawidget.widgetprocessor.iface.WidgetProcessor;
 import sk.uniza.fri.pds.spotreba.energie.gui.DbTab;
+
 import sk.uniza.fri.pds.spotreba.energie.gui.FilePanel;
+
 import sk.uniza.fri.pds.spotreba.energie.gui.ImagePanel;
 
 public class MetawidgetUtils {
@@ -36,6 +40,7 @@ public class MetawidgetUtils {
     public static void setCommonSettings(SwingMetawidget metawidget) {
         metawidget.setWidgetBuilder(new CompositeWidgetBuilder<>(new CompositeWidgetBuilderConfig()
                 .setWidgetBuilders(
+
                         new OverriddenWidgetBuilder(),
                         new ReadOnlyWidgetBuilder(),
                         new WidgetBuilders.DateWidgetBuilder(),
@@ -43,6 +48,7 @@ public class MetawidgetUtils {
                         new WidgetBuilders.EnumWidgetBuilder(),
                         new WidgetBuilders.FileWidgetBuilder(),
                         new SwingWidgetBuilder()
+
                 )));
         metawidget.addWidgetProcessor(new BeansBindingProcessor(
                 new BeansBindingProcessorConfig()
@@ -68,6 +74,7 @@ public class MetawidgetUtils {
                             }
                         }
                     });
+
                 } else if (w instanceof FilePanel) {
                     ((FilePanel) w).addPropertyChangeListener(new PropertyChangeListener() {
                         @Override
@@ -85,6 +92,7 @@ public class MetawidgetUtils {
                             }
                         }
                     });
+
                 } else if (w instanceof JDateChooser) {
                     ((JDateChooser) w).getDateEditor().addPropertyChangeListener(new PropertyChangeListener() {
                         @Override
