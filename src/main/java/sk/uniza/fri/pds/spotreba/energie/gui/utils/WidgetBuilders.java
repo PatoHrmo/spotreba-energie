@@ -8,6 +8,9 @@ package sk.uniza.fri.pds.spotreba.energie.gui.utils;
 import com.toedter.calendar.JDateChooser;
 import java.awt.Component;
 import java.awt.image.BufferedImage;
+
+import java.io.File;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Date;
@@ -18,6 +21,9 @@ import javax.swing.JComboBox;
 import static org.metawidget.inspector.InspectionResultConstants.*;
 import org.metawidget.swing.SwingMetawidget;
 import org.metawidget.widgetbuilder.iface.WidgetBuilder;
+
+import sk.uniza.fri.pds.spotreba.energie.gui.FilePanel;
+
 import sk.uniza.fri.pds.spotreba.energie.gui.ImagePanel;
 
 public class WidgetBuilders {
@@ -63,6 +69,31 @@ public class WidgetBuilders {
         }
 
     }
+
+
+    public static class FileWidgetBuilder implements WidgetBuilder<Component, SwingMetawidget> {
+
+        @Override
+        public Component buildWidget(String elementName, Map<String, String> attributes, SwingMetawidget metawidget) {
+            if (File.class.getName().equalsIgnoreCase(attributes.get(TYPE))) {
+                try {
+                    Object obj = metawidget.getToInspect();
+                    Method method = findGeter(obj, attributes.get(NAME));
+                    File file = (File) method.invoke(obj);
+                    FilePanel panel = new FilePanel();
+                    if (file != null) {
+                        panel.setFile(file);
+                    }
+                    return panel;
+                } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+                    Logger.getLogger(WidgetBuilders.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            return null;
+        }
+
+    }
+
 
     public static class EnumWidgetBuilder implements WidgetBuilder<Component, SwingMetawidget> {
 
