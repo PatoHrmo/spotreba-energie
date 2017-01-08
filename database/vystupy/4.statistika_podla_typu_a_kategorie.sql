@@ -41,7 +41,7 @@ begin
               min_spotreba:=spotreba_v_mesiaci;
               datum_min:= cislo_mesiaca;
             end if;
-            priem_spotreba:= spotreba_v_mesiaci;
+            priem_spotreba:= priem_spotreba+ spotreba_v_mesiaci;
           end loop;
           priem_spotreba:= priem_spotreba/12;
           zaznamy.extend;
